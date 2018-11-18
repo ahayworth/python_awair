@@ -27,7 +27,7 @@ import asyncio
 async def test_it():
   session = aiohttp.ClientSession()
   client = AwairClient('your_access_token', session=session)
-  result = await client.get_latest("device_uuid")
+  result = await client.air_data_latest("device_uuid")
   print(result)
   await session.close()
 
