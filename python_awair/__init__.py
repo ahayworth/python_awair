@@ -19,17 +19,17 @@ class AwairClient():
             self._session = session
 
     @asyncio.coroutine
-    def get_user(self):
+    def user(self):
         """Yields user data."""
         return (yield from self._query(const.USER_QUERY))['User']
 
     @asyncio.coroutine
-    def get_devices(self):
+    def devices(self):
         """Lists devices and locations."""
         return (yield from self._query(const.DEVICE_QUERY))['Devices']['devices']
 
     @asyncio.coroutine
-    def get_latest(self, uuid, fahrenheit=False):
+    def air_data_latest(self, uuid, fahrenheit=False):
         """Returns the latest air quality measurements."""
         variables = {
             "uuid": self._quote(uuid),
@@ -41,7 +41,7 @@ class AwairClient():
 
 
     @asyncio.coroutine
-    def get_5_min(self, uuid, **kwargs):
+    def air_data_five_minute(self, uuid, **kwargs):
         """Returns the 5min summary air quality measurements."""
         # args from_date, to_date, limit, desc, fahrenheit)
         variables = {
@@ -56,7 +56,7 @@ class AwairClient():
 
 
     @asyncio.coroutine
-    def get_15_min(self, uuid, **kwargs):
+    def air_data_fifteen_minute(self, uuid, **kwargs):
         """Returns the 15min summary air quality measurements."""
         # args from_date, to_date, limit, desc, fahrenheit)
         variables = {
@@ -71,7 +71,7 @@ class AwairClient():
 
 
     @asyncio.coroutine
-    def get_raw(self, uuid, **kwargs):
+    def air_data_raw(self, uuid, **kwargs):
         """Returns raw air quality measurements."""
         # args from_date, to_date, limit, desc, fahrenheit)
         variables = {
