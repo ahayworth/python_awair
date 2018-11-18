@@ -1,3 +1,4 @@
+#pylint: skip-file
 import aiohttp
 import asyncio
 import pytest
@@ -8,6 +9,7 @@ from python_awair import const
 loop = asyncio.get_event_loop()
 
 user_response = '''{"data":{"User":{"id":"12345","email":"test@test.com","name":{"firstName":"Test","lastName":"Test"},"dob":{"year":2018,"month":11,"day":11},"sex":"MALE","tier":"Hobbyist","permissions":[{"scope":"FIFTEEN_MIN","quota":100}],"usage":[{"scope":"LATEST","counts":9}]}}}'''
+devices_response = '''{"data":{"Devices":{"devices":[{"uuid":"awair_12345","deviceType":"awair","deviceId":"12345","name":"Awair","preference":"GENERAL","macAddress":"FFFFFFFFFFFF","room":{"id":"ffffffff-ffff-ffff-ffff-ffffffffffff","name":"My Room","kind":"LIVING_ROOM","Space":{"id":"ffffffff-ffff-ffff-ffff-ffffffffffff","kind":"HOME","location":{"name":"Chicago, IL","timezone":"","lat":0.0,"lon":-0.0}}}}]}}}'''
 latest_response = '''{"data":{"AirDataLatest":{"airDataSeq":[{"timestamp":"2018-11-18T01:09:48.187Z","score":69.0,"sensors":[{"component":"TEMP","value":26.66}],"indices":[{"component":"TEMP","value":1.0}]}]}}}'''
 five_minute_response = '''{"data":{"AirData5Minute":{"airDataSeq":[{"timestamp":"2018-11-18T01:09:48.187Z","score":69.0,"sensors":[{"component":"TEMP","value":26.66}],"indices":[{"component":"TEMP","value":1.0}]}]}}}'''
 fifteen_minute_response = '''{"data":{"AirData15Minute":{"airDataSeq":[{"timestamp":"2018-11-18T01:09:48.187Z","score":69.0,"sensors":[{"component":"TEMP","value":26.66}],"indices":[{"component":"TEMP","value":1.0}]}]}}}'''
@@ -44,6 +46,15 @@ def test_get_user_with_session():
         assert resp["tier"] == "Hobbyist"
         assert resp["permissions"][0] == dict(scope="FIFTEEN_MIN", quota=100)
         assert resp["usage"][0] == dict(scope="LATEST", counts=9)
+
+def test_get_devices():
+    awair = AwairClient('example_token')
+    with aioresponses() as mocked:
+        mocked.post(const.AWAIR_URL, status=200, body=devices_response)
+        resp = loop.run_until_complete(awair.devices())
+
+        assert resp[0]["uuid"] == "awair_12345"
+        assert resp[0]["deviceType"] == "awair"
 
 def test_get_latest():
     awair = AwairClient('example_token')
