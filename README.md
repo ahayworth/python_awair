@@ -14,6 +14,9 @@ Not yet supported:
   via REST.
 - anything other than hobbyist-level endpoints (eg, no organizations)
 
+Getting started:
+- You'll need an access token from the [Awair Developer Console](https://developer.getawair.com/console). It's free.
+
 Usage:
 
 ```python
