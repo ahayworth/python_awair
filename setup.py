@@ -12,11 +12,12 @@ setuptools.setup(
     install_requires=["aiohttp>=3.4.4", "async_timeout"],
     zip_safe=True,
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
-        "Programming Language :: Python 3.5",
-        "Programming Language :: Python 3.6",
-        "Programming Language :: Python 3.7",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Framework :: AsyncIO",
     ]
 )
