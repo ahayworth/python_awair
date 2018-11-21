@@ -14,6 +14,7 @@ latest_response = '''{"data":{"AirDataLatest":{"airDataSeq":[{"timestamp":"2018-
 five_minute_response = '''{"data":{"AirData5Minute":{"airDataSeq":[{"timestamp":"2018-11-18T01:09:48.187Z","score":69.0,"sensors":[{"component":"TEMP","value":26.66}],"indices":[{"component":"TEMP","value":1.0}]}]}}}'''
 fifteen_minute_response = '''{"data":{"AirData15Minute":{"airDataSeq":[{"timestamp":"2018-11-18T01:09:48.187Z","score":69.0,"sensors":[{"component":"TEMP","value":26.66}],"indices":[{"component":"TEMP","value":1.0}]}]}}}'''
 raw_response = '''{"data":{"AirDataRaw":{"airDataSeq":[{"timestamp":"2018-11-18T01:09:48.187Z","score":69.0,"sensors":[{"component":"TEMP","value":26.66}],"indices":[{"component":"TEMP","value":1.0}]}]}}}'''
+ratelimit_response = '''{"data":null,"errors":[{"message":"Too many requests during the past 24 hours","path":["User"],"locations":[{"line":1,"column":9}]}]}'''
 
 def test_get_user():
     awair = AwairClient('example_token')
@@ -108,12 +109,40 @@ def test_get_raw():
         assert resp[0]['indices'][0]['component'] == 'TEMP'
         assert resp[0]['indices'][0]['value'] == 1.0
 
-def test_bad_request():
+def test_auth_failure():
     awair = AwairClient('bad_token')
     with aioresponses() as mocked:
         mocked.post(const.AWAIR_URL, status=401, body='The supplied authentication is invalid')
 
-        with pytest.raises(Exception):
+        with pytest.raises(AwairClient.AuthError):
             resp = loop.run_until_complete(awair.air_data_raw("test_device"))
             assert resp.code == 401
             assert resp.body == 'The supplied authentication is invalid'
+
+def test_bad_query():
+    awair = AwairClient('bad_token')
+    with aioresponses() as mocked:
+        mocked.post(const.AWAIR_URL, status=400)
+
+        with pytest.raises(AwairClient.QueryError):
+            resp = loop.run_until_complete(awair.air_data_raw("test_device"))
+            assert resp.code == 400
+
+def test_not_found():
+    awair = AwairClient('bad_token')
+    with aioresponses() as mocked:
+        mocked.post(const.AWAIR_URL, status=404)
+
+        with pytest.raises(AwairClient.NotFoundError):
+            resp = loop.run_until_complete(awair.air_data_raw("test_device"))
+            assert resp.code == 404
+
+def test_ratelimit():
+    awair = AwairClient('bad_token')
+
+    with aioresponses() as mocked:
+        mocked.post(const.AWAIR_URL, status=200, body=ratelimit_response)
+
+        with pytest.raises(AwairClient.RatelimitError):
+            resp = loop.run_until_complete(awair.air_data_raw("test_device"))
+            assert resp.code == 200

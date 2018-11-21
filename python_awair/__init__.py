@@ -90,11 +90,44 @@ class AwairClient():
         data = {"query": "query { %s }" % query, "variables": variables}
         with async_timeout.timeout(self._timeout.total):
             resp = yield from self._session.post(const.AWAIR_URL, json=data, headers=self._headers)
-            text = yield from resp.text()
-            if resp.status != 200:
-                raise Exception(text)
+            if resp.status == 400:
+                raise AwairClient.QueryError(
+                    "The query %s with variables %s is invalid." % (
+                        query, variables
+                    )
+                )
+            elif resp.status == 401:
+                raise AwairClient.AuthError(
+                    "The supplied access token is invalid or " +
+                    "does not have access to the requested data."
+                )
+            elif resp.status == 404:
+                raise AwairClient.NotFoundError(
+                    "The Awair API returned an unexpected HTTP 404."
+                )
 
-            return (yield from resp.json())['data']
+            if resp.status == 200:
+                json = yield from resp.json()
+                data = json['data']
+
+                if 'errors' in json:
+                    errors = json['errors']
+
+                    ratelimit = False
+                    for error in errors:
+                        if "Too many requests" in error['message']:
+                            ratelimit = True
+                            break
+
+                    if ratelimit:
+                        raise AwairClient.RatelimitError(
+                            "The ratelimit for the Awair API has been exceeded. " +
+                            "Please try again later."
+                        )
+
+                return data
+
+            return AwairClient.GenericError("Unable to query the Awair API.")
 
     @staticmethod
     def _quote(arg):
@@ -112,3 +145,28 @@ class AwairClient():
     @staticmethod
     def _query_variables(variables):
         return ",".join(["%s: %s" % (k, v) for (k, v) in variables.items()])
+
+
+    class GenericError(Exception):
+        """Generic error."""
+        pass
+
+
+    class AuthError(Exception):
+        """Some kind of authorization or authentication failure."""
+        pass
+
+
+    class QueryError(Exception):
+        """The query was somehow malformed."""
+        pass
+
+
+    class NotFoundError(Exception):
+        """The requested endpoint is gone."""
+        pass
+
+
+    class RatelimitError(Exception):
+        """The API quota was exceeded."""
+        pass
