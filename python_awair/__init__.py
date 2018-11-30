@@ -32,7 +32,7 @@ class AwairClient():
     def air_data_latest(self, uuid, fahrenheit=False):
         """Returns the latest air quality measurements."""
         variables = {
-            "uuid": self._quote(uuid),
+            "deviceUUID": self._quote(uuid),
             "fahrenheit": self._quote(fahrenheit),
         }
 
@@ -45,7 +45,7 @@ class AwairClient():
         """Returns the 5min summary air quality measurements."""
         # args from_date, to_date, limit, desc, fahrenheit)
         variables = {
-            "uuid": self._quote(uuid),
+            "deviceUUID": self._quote(uuid),
         }
 
         for key, value in kwargs.items():
@@ -60,7 +60,7 @@ class AwairClient():
         """Returns the 15min summary air quality measurements."""
         # args from_date, to_date, limit, desc, fahrenheit)
         variables = {
-            "uuid": self._quote(uuid),
+            "deviceUUID": self._quote(uuid),
         }
 
         for key, value in kwargs.items():
@@ -75,7 +75,7 @@ class AwairClient():
         """Returns raw air quality measurements."""
         # args from_date, to_date, limit, desc, fahrenheit)
         variables = {
-            "uuid": self._quote(uuid),
+            "deviceUUID": self._quote(uuid),
         }
 
         for key, value in kwargs.items():
