@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="python_awair",
-    version="0.0.2",
+    version="0.0.3",
     url="https://github.com/ahayworth/python_awair",
     author="Andrew Hayworth",
     author_email="ahayworth@gmail.com",
