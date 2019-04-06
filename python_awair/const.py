@@ -44,8 +44,8 @@ Devices {
                 location {
                     name
                     timezone
-                    lat
-                    lon
+                    latitude
+                    longitude
                 }
             }
         }
