@@ -42,6 +42,7 @@ legacy_tox_ini = """
 envlist = py36, py37, py38
 isolated_build = True
 skipsdist = True
+skip_missing_interpreters = True
 
 [gh-actions]
 python =
