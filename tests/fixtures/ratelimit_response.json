@@ -1,0 +1,17 @@
+{
+  "data": null,
+  "errors": [
+    {
+      "message": "Too many requests during the past 24 hours",
+      "path": [
+        "User"
+      ],
+      "locations": [
+        {
+          "line": 1,
+          "column": 9
+        }
+      ]
+    }
+  ]
+}
