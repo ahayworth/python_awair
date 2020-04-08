@@ -11,6 +11,7 @@ class AwairClient:
     def __init__(
         self, access_token, session=None, timeout=aiohttp.client.DEFAULT_TIMEOUT
     ):
+        """Initialize an AwairClient with sensible defaults."""
         self._headers = {
             "Authorization": "Bearer %s" % access_token,
             "Content-Type": "application/json",
@@ -20,17 +21,17 @@ class AwairClient:
         self._session = session
 
     async def user(self):
-        """Yields user data."""
+        """Yield user data."""
         response = await self._query(const.USER_QUERY)
         return response["User"]
 
     async def devices(self):
-        """Lists devices and locations."""
+        """List devices and locations."""
         response = await self._query(const.DEVICE_QUERY)
         return response["Devices"]["devices"]
 
     async def air_data_latest(self, uuid, fahrenheit=False):
-        """Returns the latest air quality measurements."""
+        """Return the latest air quality measurements."""
         variables = {
             "deviceUUID": self._quote(uuid),
             "fahrenheit": self._quote(fahrenheit),
@@ -42,7 +43,7 @@ class AwairClient:
         return response["AirDataLatest"]["airDataSeq"]
 
     async def air_data_five_minute(self, uuid, **kwargs):
-        """Returns the 5min summary air quality measurements."""
+        """Return the 5min summary air quality measurements."""
         # args from_date, to_date, limit, desc, fahrenheit)
         variables = {
             "deviceUUID": self._quote(uuid),
@@ -57,7 +58,7 @@ class AwairClient:
         return response["AirData5Minute"]["airDataSeq"]
 
     async def air_data_fifteen_minute(self, uuid, **kwargs):
-        """Returns the 15min summary air quality measurements."""
+        """Return the 15min summary air quality measurements."""
         # args from_date, to_date, limit, desc, fahrenheit)
         variables = {
             "deviceUUID": self._quote(uuid),
@@ -72,7 +73,7 @@ class AwairClient:
         return response["AirData15Minute"]["airDataSeq"]
 
     async def air_data_raw(self, uuid, **kwargs):
-        """Returns raw air quality measurements."""
+        """Return raw air quality measurements."""
         # args from_date, to_date, limit, desc, fahrenheit)
         variables = {
             "deviceUUID": self._quote(uuid),

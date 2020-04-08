@@ -26,3 +26,5 @@ jobs:
         run: poetry install
       - name: Run tests
         run: poetry run tox
+      - name: Run lint
+        run: poetry run tox -e lint

@@ -1,5 +1,5 @@
 let g:ale_linters = {
-\   'python': ['pylint', 'flake8', 'mypy', 'pyls']
+\   'python': ['pylint', 'flake8', 'mypy', 'pyls', 'pydocstyle']
 \}
 
 let g:ale_fixers = {
