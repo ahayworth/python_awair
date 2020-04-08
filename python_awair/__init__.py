@@ -87,16 +87,24 @@ class AwairClient:
         return response["AirDataRaw"]["airDataSeq"]
 
     async def _query(self, query, variables=None):
-        session = self._session or aiohttp.ClientSession()
         data = {"query": "query { %s }" % query, "variables": variables}
-        async with session.post(
-            const.AWAIR_URL, json=data, headers=self._headers, timeout=self._timeout
-        ) as resp:
-            if resp.status == 200:
-                json = await resp.json()
 
         if self._session is None:
-            await session.close()
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    const.AWAIR_URL,
+                    json=data,
+                    headers=self._headers,
+                    timeout=self._timeout,
+                ) as resp:
+                    if resp.status == 200:
+                        json = await resp.json()
+        else:
+            async with self._session.post(
+                const.AWAIR_URL, json=data, headers=self._headers, timeout=self._timeout
+            ) as resp:
+                if resp.status == 200:
+                    json = await resp.json()
 
         if resp.status == 200:
             data = json["data"]
