@@ -1,11 +1,11 @@
 """Test basic python_awair functionality."""
-import asyncio
 
 import aiohttp
 import pytest
 from aioresponses import aioresponses
 
 from python_awair import AwairClient, const
+
 
 @pytest.fixture
 def mock_user_response():
@@ -87,25 +87,25 @@ async def test_get_user(
 
 
 async def test_get_user_with_session(
-    mock_user_response
+    mock_user_response,
 ):  # pylint: disable=unused-argument,redefined-outer-name
     """Test that we can get a user response with an explicit session."""
-    session = aiohttp.ClientSession()
-    awair = AwairClient("example_token", session=session)
-    resp = await awair.user()
+    async with aiohttp.ClientSession() as session:
+        awair = AwairClient("example_token", session=session)
+        resp = await awair.user()
 
-    # It's a big response, just assert some things
-    assert resp["id"] == "12345"
-    assert resp["email"] == "test@test.com"
-    assert resp["name"]["lastName"] == "Test"
-    assert resp["dob"]["day"] == 11
-    assert resp["tier"] == "Hobbyist"
-    assert resp["permissions"][0] == dict(scope="FIFTEEN_MIN", quota=100)
-    assert resp["usage"][0] == dict(scope="LATEST", counts=9)
+        # It's a big response, just assert some things
+        assert resp["id"] == "12345"
+        assert resp["email"] == "test@test.com"
+        assert resp["name"]["lastName"] == "Test"
+        assert resp["dob"]["day"] == 11
+        assert resp["tier"] == "Hobbyist"
+        assert resp["permissions"][0] == dict(scope="FIFTEEN_MIN", quota=100)
+        assert resp["usage"][0] == dict(scope="LATEST", counts=9)
 
 
 async def test_get_devices(
-    mock_devices_response
+    mock_devices_response,
 ):  # pylint: disable=unused-argument,redefined-outer-name
     """Test that we can get a list of devices."""
     awair = AwairClient("example_token")
@@ -116,7 +116,7 @@ async def test_get_devices(
 
 
 async def test_get_latest(
-    mock_latest_response
+    mock_latest_response,
 ):  # pylint: disable=unused-argument,redefined-outer-name
     """Test that we can get the latest air data."""
     awair = AwairClient("example_token")
@@ -130,7 +130,7 @@ async def test_get_latest(
 
 
 async def test_get_five_minute(
-    mock_five_minute_response
+    mock_five_minute_response,
 ):  # pylint: disable=unused-argument,redefined-outer-name
     """Test that we can get the five-minute avg air data."""
     awair = AwairClient("example_token")
@@ -144,7 +144,7 @@ async def test_get_five_minute(
 
 
 async def test_get_fifteen_minute(
-    mock_fifteen_minute_response
+    mock_fifteen_minute_response,
 ):  # pylint: disable=unused-argument,redefined-outer-name
     """Test that we can get the fifteen-minute avg air data."""
     awair = AwairClient("example_token")
@@ -158,7 +158,7 @@ async def test_get_fifteen_minute(
 
 
 async def test_get_raw(
-    mock_raw_response
+    mock_raw_response,
 ):  # pylint: disable=unused-argument,redefined-outer-name
     """Test that we can get the raw air data."""
     awair = AwairClient("example_token")
@@ -208,7 +208,7 @@ async def test_not_found():
 
 
 async def test_ratelimit(
-    mock_ratelimit_response
+    mock_ratelimit_response,
 ):  # pylint: disable=unused-argument,redefined-outer-name
     """Test that we can raise ratelimit."""
     awair = AwairClient("bad_token")

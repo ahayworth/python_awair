@@ -1,7 +1,6 @@
 """Python asyncio client for the Awair GraphQL API."""
 
 import aiohttp
-import async_timeout
 
 from python_awair import const
 
@@ -90,49 +89,52 @@ class AwairClient:
     async def _query(self, query, variables=None):
         session = self._session or aiohttp.ClientSession()
         data = {"query": "query { %s }" % query, "variables": variables}
-        with async_timeout.timeout(self._timeout.total):
-            resp = await session.post(
-                const.AWAIR_URL, json=data, headers=self._headers
-            )
-
-            if resp.status == 400:
-                raise AwairClient.QueryError(
-                    "The query %s with variables %s is invalid." % (query, variables)
-                )
-
-            if resp.status == 401:
-                raise AwairClient.AuthError(
-                    "The supplied access token is invalid or "
-                    + "does not have access to the requested data."
-                )
-
-            if resp.status == 404:
-                raise AwairClient.NotFoundError(
-                    "The Awair API returned an unexpected HTTP 404."
-                )
-
+        async with session.post(
+            const.AWAIR_URL, json=data, headers=self._headers, timeout=self._timeout
+        ) as resp:
             if resp.status == 200:
                 json = await resp.json()
-                data = json["data"]
 
-                if "errors" in json:
-                    errors = json["errors"]
+        if self._session is None:
+            await session.close()
 
-                    ratelimit = False
-                    for error in errors:
-                        if "Too many requests" in error["message"]:
-                            ratelimit = True
-                            break
+        if resp.status == 200:
+            data = json["data"]
 
-                    if ratelimit:
-                        raise AwairClient.RatelimitError(
-                            "The ratelimit for the Awair API has been exceeded. "
-                            + "Please try again later."
-                        )
+            if "errors" in json:
+                errors = json["errors"]
 
-                return data
+                ratelimit = False
+                for error in errors:
+                    if "Too many requests" in error["message"]:
+                        ratelimit = True
+                        break
 
-            return AwairClient.GenericError("Unable to query the Awair API.")
+                if ratelimit:
+                    raise AwairClient.RatelimitError(
+                        "The ratelimit for the Awair API has been exceeded. "
+                        + "Please try again later."
+                    )
+
+            return data
+
+        if resp.status == 400:
+            raise AwairClient.QueryError(
+                "The query %s with variables %s is invalid." % (query, variables)
+            )
+
+        if resp.status == 401:
+            raise AwairClient.AuthError(
+                "The supplied access token is invalid or "
+                + "does not have access to the requested data."
+            )
+
+        if resp.status == 404:
+            raise AwairClient.NotFoundError(
+                "The Awair API returned an unexpected HTTP 404."
+            )
+
+        raise AwairClient.GenericError("Unable to query the Awair API.")
 
     @staticmethod
     def _quote(arg):
