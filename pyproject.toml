@@ -46,12 +46,6 @@ isolated_build = True
 skipsdist = True
 skip_missing_interpreters = True
 
-[gh-actions]
-python =
-  3.6: py36
-  3.7: py37
-  3.8: py38
-
 [testenv]
 whitelist_externals = poetry
 commands = poetry run pytest {posargs}
