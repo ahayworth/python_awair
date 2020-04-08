@@ -562,20 +562,6 @@ testing = ["freezegun (>=0.3.11,<1)", "pathlib2 (>=2.3.3,<3)", "pytest (>=4.0.0,
 
 [[package]]
 category = "dev"
-description = "Seamless integration of tox into GitHub Actions"
-name = "tox-gh-actions"
-optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
-version = "1.2.0"
-
-[package.dependencies]
-tox = ">=3.12.2"
-
-[package.extras]
-testing = ["flake8 (>=3,<4)", "pytest (>=4.0.0,<6)", "pytest-mock (>=2,<3)", "pytest-randomly (>=3)"]
-
-[[package]]
-category = "dev"
 description = "a fork of Python 2 and 3 ast modules with type comment support"
 name = "typed-ast"
 optional = false
@@ -668,7 +654,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "55936501bf77f03b520feb3a6954f3ac0793627c2d60ed3b9690866da889122c"
+content-hash = "1c2d2004d94d2ca8bcbd28bb519d7a7366c78da204faa397a952de49705df235"
 python-versions = "^3.6"
 
 [metadata.files]
@@ -917,10 +903,6 @@ toml = [
 tox = [
     {file = "tox-3.14.6-py2.py3-none-any.whl", hash = "sha256:b2c4b91c975ea5c11463d9ca00bebf82654439c5df0f614807b9bdec62cc9471"},
     {file = "tox-3.14.6.tar.gz", hash = "sha256:a4a6689045d93c208d77230853b28058b7513f5123647b67bf012f82fa168303"},
-]
-tox-gh-actions = [
-    {file = "tox-gh-actions-1.2.0.tar.gz", hash = "sha256:ea00a9897a5ad45be4b7f94d889e62f09abc0dac7df7a75881f852e4f4005960"},
-    {file = "tox_gh_actions-1.2.0-py2.py3-none-any.whl", hash = "sha256:d5f694d2f49e324c991e8c8cbc026ae33d198817abe266f4c6b73d2d33b89c1f"},
 ]
 typed-ast = [
     {file = "typed_ast-1.4.1-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:73d785a950fc82dd2a25897d525d003f6378d1cb23ab305578394694202a58c3"},
