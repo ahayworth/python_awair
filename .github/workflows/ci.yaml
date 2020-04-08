@@ -31,14 +31,10 @@ jobs:
             ${{ runner.os }}-poetry-${{ matrix.python-version }}
       - name: Install dependencies
         run: poetry install
-      - name: debug
-        run: |
-          poetry run ls -larth
-          poetry run pwd
       - name: Tests
         run: |
-          poetry run tox -e ${{ matrix.toxenv }}
+          poetry run tox -vv -e ${{ matrix.toxenv }}
       - name: Linters
         run: |
-          poetry run tox -e lint
+          poetry run tox -vv -e lint
         if: matrix.python-version == '3.8'
