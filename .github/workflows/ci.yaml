@@ -32,7 +32,9 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Tests
-        run: poetry run tox -e ${{ matrix.toxenv }}
+        run: |
+          poetry run tox -e ${{ matrix.toxenv }}
       - name: Linters
-        run: poetry run tox -e lint
+        run: |
+          poetry run tox -e lint
         if: matrix.python-version == '3.8'
