@@ -1,7 +1,7 @@
 # python_awair
 
 ![Latest PyPI version](https://img.shields.io/pypi/v/python_awair.svg)
-![Latest Travis CI build status](https://travis-ci.org/ahayworth/python_awair.png)
+![CI](https://github.com/ahayworth/python_awair/workflows/CI/badge.svg?branch=master)
 ![Coveralls](https://coveralls.io/repos/github/ahayworth/python_awair/badge.svg?branch=master)
 
 This is a WIP library to access the Awair API.
