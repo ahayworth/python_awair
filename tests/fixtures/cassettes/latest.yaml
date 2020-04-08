@@ -1,0 +1,30 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: POST
+    uri: https://developer-apis.awair.is/graphql
+  response:
+    body:
+      string: '{"data":{"AirDataLatest":{"airDataSeq":[{"timestamp":"2020-04-08T22:59:29.884Z","score":84.0,"sensors":[{"component":"TEMP","value":24.75},{"component":"HUMID","value":47.75},{"component":"CO2","value":918.0},{"component":"VOC","value":755.0},{"component":"DUST","value":14.800000190734863}],"indices":[{"component":"TEMP","value":0.0},{"component":"HUMID","value":0.0},{"component":"CO2","value":0.0},{"component":"VOC","value":1.0},{"component":"DUST","value":1.0}]}]}}}'
+    headers:
+      Access-Control-Allow-Credentials: 'true'
+      Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept,
+        Authorization, Accept-Encoding, Accept-Language, Host, Referer, User-Agent
+      Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+      Access-Control-Allow-Origin: '*'
+      Alt-Svc: clear
+      Content-Length: '472'
+      Content-Type: application/json
+      Date: Wed, 08 Apr 2020 22:59:31 GMT
+      Server: akka-http/10.1.1
+      Via: 1.1 google
+    status:
+      code: 200
+      message: OK
+    url: https://developer-apis.awair.is/graphql
+version: 1

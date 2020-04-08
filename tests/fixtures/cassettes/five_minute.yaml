@@ -1,0 +1,30 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: POST
+    uri: https://developer-apis.awair.is/graphql
+  response:
+    body:
+      string: '{"data":{"AirData5Minute":{"airDataSeq":[{"timestamp":"2020-04-08T23:00:00.000Z","score":84.76666666666667,"sensors":[{"component":"TEMP","value":24.666666666666668},{"component":"HUMID","value":47.838666407267254},{"component":"CO2","value":909.5333333333333},{"component":"VOC","value":751.2666666666667},{"component":"DUST","value":13.813333320617676}],"indices":[{"component":"TEMP","value":0.0},{"component":"HUMID","value":0.0},{"component":"CO2","value":0.0},{"component":"VOC","value":1.0},{"component":"DUST","value":1.0}]},{"timestamp":"2020-04-08T23:05:00.000Z","score":84.8,"sensors":[{"component":"TEMP","value":24.657333119710287},{"component":"HUMID","value":47.9153330485026},{"component":"CO2","value":917.9},{"component":"VOC","value":744.4666666666667},{"component":"DUST","value":14.043333339691163}],"indices":[{"component":"TEMP","value":0.0},{"component":"HUMID","value":0.0},{"component":"CO2","value":0.0},{"component":"VOC","value":1.0},{"component":"DUST","value":1.0}]},{"timestamp":"2020-04-08T23:10:00.000Z","score":84.55172413793103,"sensors":[{"component":"TEMP","value":24.622413898336475},{"component":"HUMID","value":47.95724132143218},{"component":"CO2","value":916.9310344827586},{"component":"VOC","value":737.3448275862069},{"component":"DUST","value":14.610344853894464}],"indices":[{"component":"TEMP","value":0.0},{"component":"HUMID","value":0.0},{"component":"CO2","value":0.0},{"component":"VOC","value":1.0},{"component":"DUST","value":1.0}]},{"timestamp":"2020-04-08T23:15:00.000Z","score":84.71428571428571,"sensors":[{"component":"TEMP","value":24.631428991045272},{"component":"HUMID","value":48.095356941223145},{"component":"CO2","value":900.5714285714286},{"component":"VOC","value":735.6785714285714},{"component":"DUST","value":14.167857136045184}],"indices":[{"component":"TEMP","value":0.0},{"component":"HUMID","value":0.0},{"component":"CO2","value":0.0},{"component":"VOC","value":1.0},{"component":"DUST","value":1.0}]}]}}}'
+    headers:
+      Access-Control-Allow-Credentials: 'true'
+      Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept,
+        Authorization, Accept-Encoding, Accept-Language, Host, Referer, User-Agent
+      Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+      Access-Control-Allow-Origin: '*'
+      Alt-Svc: clear
+      Content-Length: '1984'
+      Content-Type: application/json
+      Date: Wed, 08 Apr 2020 23:19:38 GMT
+      Server: akka-http/10.1.1
+      Via: 1.1 google
+    status:
+      code: 200
+      message: OK
+    url: https://developer-apis.awair.is/graphql
+version: 1

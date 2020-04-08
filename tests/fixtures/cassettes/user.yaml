@@ -1,0 +1,30 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: POST
+    uri: https://developer-apis.awair.is/graphql
+  response:
+    body:
+      string: '{"data":{"User":{"id":"32406","email":"foo@bar.com","name":{"firstName":"Andrew","lastName":"Hayworth"},"dob":{"year":2020,"month":4,"day":8},"sex":"MALE","tier":"Large_developer","permissions":[{"scope":"USER_DEVICE_LIST","quota":2147483647},{"scope":"USER_INFO","quota":2147483647},{"scope":"FIFTEEN_MIN","quota":30000},{"scope":"FIVE_MIN","quota":30000},{"scope":"RAW","quota":30000},{"scope":"LATEST","quota":30000},{"scope":"PUT_PREFERENCE","quota":30000},{"scope":"PUT_DISPLAY_MODE","quota":30000},{"scope":"PUT_LED_MODE","quota":30000},{"scope":"PUT_KNOCKING_MODE","quota":30000},{"scope":"PUT_TIMEZONE","quota":30000},{"scope":"PUT_DEVICE_NAME","quota":30000},{"scope":"PUT_LOCATION","quota":30000},{"scope":"PUT_ROOM_TYPE","quota":30000},{"scope":"PUT_SPACE_TYPE","quota":30000},{"scope":"GET_DISPLAY_MODE","quota":30000},{"scope":"GET_LED_MODE","quota":30000},{"scope":"GET_KNOCKING_MODE","quota":30000},{"scope":"GET_POWER_STATUS","quota":30000},{"scope":"GET_TIMEZONE","quota":30000}],"usage":[{"scope":"USER_INFO","counts":10}]}}}'
+    headers:
+      Access-Control-Allow-Credentials: 'true'
+      Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept,
+        Authorization, Accept-Encoding, Accept-Language, Host, Referer, User-Agent
+      Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+      Access-Control-Allow-Origin: '*'
+      Alt-Svc: clear
+      Content-Length: '1052'
+      Content-Type: application/json
+      Date: Wed, 08 Apr 2020 22:44:41 GMT
+      Server: akka-http/10.1.1
+      Via: 1.1 google
+    status:
+      code: 200
+      message: OK
+    url: https://developer-apis.awair.is/graphql
+version: 1

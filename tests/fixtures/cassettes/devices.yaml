@@ -1,0 +1,33 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: POST
+    uri: https://developer-apis.awair.is/graphql
+  response:
+    body:
+      string: '{"data":{"Devices":{"devices":[{"uuid":"awair_24947","deviceType":"awair","deviceId":"24947","name":"Living
+        Room","preference":"GENERAL","macAddress":"70886B104941","room":{"id":"f2b719c3-1ca9-4451-abc1-4a54f4d9ab1c","name":"Living
+        Room","kind":"LIVING_ROOM","Space":{"id":"53ce20d1-0088-4571-a6b2-974b90778c36","kind":"HOME","location":{"name":"Chicago,
+        IL","timezone":"","latitude":0.0,"longitude":0.0}}}}]}}}'
+    headers:
+      Access-Control-Allow-Credentials: 'true'
+      Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept,
+        Authorization, Accept-Encoding, Accept-Language, Host, Referer, User-Agent
+      Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+      Access-Control-Allow-Origin: '*'
+      Alt-Svc: clear
+      Content-Length: '440'
+      Content-Type: application/json
+      Date: Wed, 08 Apr 2020 23:28:20 GMT
+      Server: akka-http/10.1.1
+      Via: 1.1 google
+    status:
+      code: 200
+      message: OK
+    url: https://developer-apis.awair.is/graphql
+version: 1

@@ -50,6 +50,9 @@ class AwairClient:
         }
 
         for key, value in kwargs.items():
+            if key == 'from_date':
+                key = 'from'
+
             variables[key] = self._quote(value)
 
         response = await self._query(
@@ -65,6 +68,9 @@ class AwairClient:
         }
 
         for key, value in kwargs.items():
+            if key == 'from_date':
+                key = 'from'
+
             variables[key] = self._quote(value)
 
         response = await self._query(
@@ -80,6 +86,9 @@ class AwairClient:
         }
 
         for key, value in kwargs.items():
+            if key == 'from_date':
+                key = 'from'
+
             variables[key] = self._quote(value)
 
         response = await self._query(
