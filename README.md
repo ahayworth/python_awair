@@ -35,3 +35,14 @@ loop = asyncio.get_event_loop()
 loop.run_until_complete(asyncio.ensure_future(test_it()))
 loop.close()
 ```
+
+# Development
+
+- We manage dependencies and builds via [poetry](https://python-poetry.org)
+- We use [pytest](https://github.com/pytest-dev/pytest) and [tox](https://github.com/tox-dev/tox) to test
+- Code style is enforced via flake8
+
+After installing and configuring poetry:
+- Run `poetry install` to install all dependencies
+- Run `poetry shell` to drop into a virtualenv
+- Run `poetry run tox` (or just `tox` if you're in the virtualenv) to test

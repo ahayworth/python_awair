@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "python-awair"
+version = "0.0.5"
+description = "asyncio client for the Awair GraphQL API"
+authors = ["Andrew Hayworth <ahayworth@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/ahayworth/python_awair"
+repository = "https://github.com/ahayworth/python_awair"
+keywords = ["awair", "getawair", "api", "async", "asyncio"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "Topic :: Home Automation",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed"
+]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+aiohttp = "~3.6.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+black = "^19.10b0"
+python-language-server = "^0.31.9"
+pyls-black = "^0.4.4"
+flake8 = "^3.7.9"
+isort = "^4.3.21"
+pyls-isort = "^0.1.1"
+tox = "^3.14.6"
+aioresponses = "^0.6.3"
+
+[tool.poetry.urls]
+"Say Thanks" = "https://saythanks.io/to/ahayworth@gmail.com"
+
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
