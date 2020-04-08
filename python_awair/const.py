@@ -70,19 +70,31 @@ airDataSeq {
 LATEST_QUERY = """
 AirDataLatest(%s) {
     %s
-}""" % ("%s", AIR_DATA_SEQ)
+}""" % (
+    "%s",
+    AIR_DATA_SEQ,
+)
 
 FIVE_MIN_QUERY = """
 AirData5Minute(%s) {
     %s
-}""" % ("%s", AIR_DATA_SEQ)
+}""" % (
+    "%s",
+    AIR_DATA_SEQ,
+)
 
 FIFTEEN_MIN_QUERY = """
 AirData15Minute(%s) {
     %s
-}""" % ("%s", AIR_DATA_SEQ)
+}""" % (
+    "%s",
+    AIR_DATA_SEQ,
+)
 
 RAW_QUERY = """
 AirDataRaw(%s) {
     %s
-}""" % ("%s", AIR_DATA_SEQ)
+}""" % (
+    "%s",
+    AIR_DATA_SEQ,
+)
