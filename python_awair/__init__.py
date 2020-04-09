@@ -33,10 +33,12 @@ class AwairClient:
 
     async def air_data_latest(self, type, id, fahrenheit=False):
         """Return the latest air quality measurements."""
-        url = "".join([
-            f"{const.DEVICE_URL}/{type}/{id}/air-data",
-            f"/latest?fahrenheit={str(fahrenheit).lower()}",
-        ])
+        url = "".join(
+            [
+                f"{const.DEVICE_URL}/{type}/{id}/air-data",
+                f"/latest?fahrenheit={str(fahrenheit).lower()}",
+            ]
+        )
         response = await self._query(url)
         return response.get("data", [{}])[0]
 
