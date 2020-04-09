@@ -1,0 +1,27 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: GET
+    uri: https://developer-apis.awair.is/v1/users/self/devices/awair/24947/air-data/raw?&fahrenheit=451
+  response:
+    body:
+      string: 'The query parameter ''fahrenheit'' was malformed:
+
+        ''451'' is not a valid Boolean value'
+    headers:
+      Alt-Svc: clear
+      Content-Length: '82'
+      Content-Type: text/plain; charset=UTF-8
+      Date: Thu, 09 Apr 2020 04:43:46 GMT
+      Server: akka-http/10.1.1
+      Via: 1.1 google
+    status:
+      code: 400
+      message: Bad Request
+    url: https://developer-apis.awair.is/v1/users/self/devices/awair/24947/air-data/raw?&fahrenheit=451
+version: 1

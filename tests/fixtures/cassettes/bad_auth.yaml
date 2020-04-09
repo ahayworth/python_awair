@@ -1,0 +1,50 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: GET
+    uri: https://developer-apis.awair.is/v1/users/self/devices/awair/24947/air-data/raw
+  response:
+    body:
+      string: The supplied authentication is invalid
+    headers:
+      Alt-Svc: clear
+      Content-Length: '38'
+      Content-Type: text/plain; charset=UTF-8
+      Date: Thu, 09 Apr 2020 04:30:56 GMT
+      Server: akka-http/10.1.1
+      Via: 1.1 google
+      WWW-Authenticate: Bearer realm="developer-apis"
+    status:
+      code: 401
+      message: Unauthorized
+    url: https://developer-apis.awair.is/v1/users/self/devices/awair/24947/air-data/raw
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: GET
+    uri: https://developer-apis.awair.is/v1/users/self/devices/awair/24948/air-data/raw
+  response:
+    body:
+      string: The supplied authentication is invalid
+    headers:
+      Alt-Svc: clear
+      Content-Length: '38'
+      Content-Type: text/plain; charset=UTF-8
+      Date: Thu, 09 Apr 2020 04:32:38 GMT
+      Server: akka-http/10.1.1
+      Via: 1.1 google
+      WWW-Authenticate: Bearer realm="developer-apis"
+    status:
+      code: 401
+      message: Unauthorized
+    url: https://developer-apis.awair.is/v1/users/self/devices/awair/24948/air-data/raw
+version: 1

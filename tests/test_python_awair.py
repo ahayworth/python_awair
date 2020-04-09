@@ -3,6 +3,7 @@
 import os
 import re
 from collections import namedtuple
+from unittest.mock import patch
 
 import aiohttp
 import pytest
@@ -12,14 +13,15 @@ from aioresponses import aioresponses
 from python_awair import AwairClient, const
 
 ACCESS_TOKEN = os.environ.get("AWAIR_ACCESS_TOKEN", "abcdefg")
-AWAIR_GEN1_UUID = "awair_24947"
+AWAIR_GEN1_TYPE = "awair"
+AWAIR_GEN1_ID = 24947
 
 Scrubber = namedtuple("Scrubber", ["pattern", "replacement"])
 SCRUBBERS = [
     Scrubber(pattern=r'"email":"[^"]+"', replacement='"email":"foo@bar.com"'),
-    Scrubber(pattern=r'"year":\d+', replacement='"year":2020'),
-    Scrubber(pattern=r'"month":\d+', replacement='"month":4'),
-    Scrubber(pattern=r'"day":\d+', replacement='"day":8'),
+    Scrubber(pattern=r'"dobYear":\d+', replacement='"dobYear":2020'),
+    Scrubber(pattern=r'"dobMonth":\d+', replacement='"dobMonth":4'),
+    Scrubber(pattern=r'"dobDay":\d+', replacement='"dobDay":8'),
     Scrubber(pattern=r'"latitude":-?\d+\.\d+', replacement='"latitude":0.0'),
     Scrubber(pattern=r'"longitude":-?\d+\.\d+', replacement='"longitude":0.0'),
 ]
@@ -44,24 +46,6 @@ VCR = vcr.VCR(
 )
 
 
-@pytest.fixture
-def mock_ratelimit_response():
-    """Returns a mocked user query."""
-    with aioresponses() as mocked:
-        with open("tests/fixtures/ratelimit_response.json") as data:
-            mocked.post(const.AWAIR_URL, status=200, body=data.read())
-            yield mocked
-
-
-@pytest.fixture
-def mock_ratelimit_response_429():
-    """Returns a mocked user query."""
-    with aioresponses() as mocked:
-        with open("tests/fixtures/ratelimit_response.json") as data:
-            mocked.post(const.AWAIR_URL, status=429, body=data.read())
-            yield mocked
-
-
 async def test_get_user():
     """Test that we can get a user response."""
     with VCR.use_cassette("user.yaml"):
@@ -70,11 +54,11 @@ async def test_get_user():
 
     assert resp["id"] == "32406"
     assert resp["email"] == "foo@bar.com"
-    assert resp["name"]["firstName"] == "Andrew"
-    assert resp["dob"]["day"] == 8
+    assert resp["firstName"] == "Andrew"
+    assert resp["dobDay"] == 8
     assert resp["tier"] == "Large_developer"
     assert dict(scope="FIFTEEN_MIN", quota=30000) in resp["permissions"]
-    assert dict(scope="USER_INFO", counts=10) in resp["usage"]
+    assert dict(scope="USER_INFO", usage=27) in resp["usages"]
 
 
 async def test_get_user_with_session():
@@ -86,11 +70,11 @@ async def test_get_user_with_session():
 
     assert resp["id"] == "32406"
     assert resp["email"] == "foo@bar.com"
-    assert resp["name"]["firstName"] == "Andrew"
-    assert resp["dob"]["day"] == 8
+    assert resp["firstName"] == "Andrew"
+    assert resp["dobDay"] == 8
     assert resp["tier"] == "Large_developer"
     assert dict(scope="FIFTEEN_MIN", quota=30000) in resp["permissions"]
-    assert dict(scope="USER_INFO", counts=10) in resp["usage"]
+    assert dict(scope="USER_INFO", usage=27) in resp["usages"]
 
 
 async def test_get_devices():
@@ -99,7 +83,7 @@ async def test_get_devices():
         awair = AwairClient(ACCESS_TOKEN)
         resp = await awair.devices()
 
-    assert resp[0]["uuid"] == AWAIR_GEN1_UUID
+    assert resp[0]["deviceId"] == AWAIR_GEN1_ID
     assert resp[0]["deviceType"] == "awair"
 
 
@@ -107,12 +91,12 @@ async def test_get_latest():
     """Test that we can get the latest air data."""
     with VCR.use_cassette("latest.yaml"):
         awair = AwairClient(ACCESS_TOKEN)
-        resp = await awair.air_data_latest(AWAIR_GEN1_UUID)
+        resp = await awair.air_data_latest(AWAIR_GEN1_TYPE, AWAIR_GEN1_ID)
 
-    assert resp[0]["timestamp"] == "2020-04-08T22:59:29.884Z"
-    assert resp[0]["score"] == 84.0
-    assert dict(component="TEMP", value=24.75) in resp[0]["sensors"]
-    assert dict(component="TEMP", value=0.0) in resp[0]["indices"]
+    assert resp["timestamp"] == "2020-04-09T04:13:15.356Z"
+    assert resp["score"] == 88.0
+    assert dict(comp="temp", value=24.420000076293945) in resp["sensors"]
+    assert dict(comp="temp", value=0.0) in resp["indices"]
 
 
 async def test_get_five_minute():
@@ -120,13 +104,13 @@ async def test_get_five_minute():
     with VCR.use_cassette("five_minute.yaml"):
         awair = AwairClient(ACCESS_TOKEN)
         resp = await awair.air_data_five_minute(
-            AWAIR_GEN1_UUID, from_date="2020-04-08T22:59:29.884Z",
+            AWAIR_GEN1_TYPE, AWAIR_GEN1_ID, from_date="2020-04-08T22:59:29.884Z",
         )
 
-    assert resp[0]["timestamp"] == "2020-04-08T23:00:00.000Z"
-    assert resp[0]["score"] == 84.76666666666667
-    assert dict(component="TEMP", value=24.666666666666668) in resp[0]["sensors"]
-    assert dict(component="TEMP", value=0.0) in resp[0]["indices"]
+    assert resp[0]["timestamp"] == "2020-04-09T04:10:00.000Z"
+    assert resp[0]["score"] == 88.0
+    assert dict(comp="temp", value=24.443000411987306) in resp[0]["sensors"]
+    assert dict(comp="temp", value=0.0) in resp[0]["indices"]
 
 
 async def test_get_fifteen_minute():
@@ -134,14 +118,14 @@ async def test_get_fifteen_minute():
     with VCR.use_cassette("fifteen_minute.yaml"):
         awair = AwairClient(ACCESS_TOKEN)
         resp = await awair.air_data_fifteen_minute(
-            AWAIR_GEN1_UUID, from_date="2020-04-08T22:59:29.884Z"
+            AWAIR_GEN1_TYPE, AWAIR_GEN1_ID, from_date="2020-04-08T22:59:29.884Z"
         )
 
-    assert resp[0]["timestamp"] == "2020-04-08T23:00:00.000Z"
-    assert resp[0]["score"] == 84.70786516853933
-    assert resp[0]["sensors"][0]["component"] == "TEMP"
-    assert resp[0]["sensors"][0]["value"] == 24.64910108587715
-    assert resp[0]["indices"][0]["component"] == "TEMP"
+    assert resp[0]["timestamp"] == "2020-04-09T04:00:00.000Z"
+    assert resp[0]["score"] == 88.0
+    assert resp[0]["sensors"][0]["comp"] == "temp"
+    assert resp[0]["sensors"][0]["value"] == 24.499499988555907
+    assert resp[0]["indices"][0]["comp"] == "temp"
     assert resp[0]["indices"][0]["value"] == 0.0
 
 
@@ -150,69 +134,41 @@ async def test_get_raw():
     with VCR.use_cassette("raw.yaml"):
         awair = AwairClient(ACCESS_TOKEN)
         resp = await awair.air_data_raw(
-            AWAIR_GEN1_UUID, from_date="2020-04-08T22:59:29.884Z"
+            AWAIR_GEN1_TYPE, AWAIR_GEN1_ID, from_date="2020-04-08T22:59:29.884Z"
         )
 
-    assert resp[0]["timestamp"] == "2020-04-08T22:59:29.884Z"
-    assert resp[0]["score"] == 84.0
-    assert resp[0]["sensors"][0]["component"] == "TEMP"
-    assert resp[0]["sensors"][0]["value"] == 24.75
-    assert resp[0]["indices"][0]["component"] == "TEMP"
+    assert resp[0]["timestamp"] == "2020-04-09T04:13:15.356Z"
+    assert resp[0]["score"] == 88.0
+    assert resp[0]["sensors"][0]["comp"] == "temp"
+    assert resp[0]["sensors"][0]["value"] == 24.420000076293945
+    assert resp[0]["indices"][0]["comp"] == "temp"
     assert resp[0]["indices"][0]["value"] == 0.0
 
 
 async def test_auth_failure():
     """Test that we can raise on bad auth."""
-    awair = AwairClient(ACCESS_TOKEN)
-    with aioresponses() as mocked:
-        mocked.post(
-            const.AWAIR_URL, status=401, body="The supplied authentication is invalid"
-        )
-
+    with VCR.use_cassette("bad_auth.yaml"):
+        awair = AwairClient("bad")
         with pytest.raises(AwairClient.AuthError):
-            resp = await awair.air_data_raw(AWAIR_GEN1_UUID)
-            assert resp.code == 401
-            assert resp.body == "The supplied authentication is invalid"
+            await awair.air_data_raw(AWAIR_GEN1_TYPE, AWAIR_GEN1_ID)
+
+        awair = AwairClient(ACCESS_TOKEN)
+        with pytest.raises(AwairClient.AuthError):
+            await awair.air_data_raw(AWAIR_GEN1_TYPE, AWAIR_GEN1_ID + 1)
 
 
 async def test_bad_query():
     """Test that we can raise on bad query."""
-    awair = AwairClient(ACCESS_TOKEN)
-    with aioresponses() as mocked:
-        mocked.post(const.AWAIR_URL, status=400)
-
+    with VCR.use_cassette("bad_params.yaml"):
+        awair = AwairClient(ACCESS_TOKEN)
         with pytest.raises(AwairClient.QueryError):
-            resp = await awair.air_data_raw(AWAIR_GEN1_UUID)
-            assert resp.code == 400
+            await awair.air_data_raw(AWAIR_GEN1_TYPE, AWAIR_GEN1_ID, fahrenheit=451)
 
 
 async def test_not_found():
     """Test that we can raise on 404."""
-    awair = AwairClient(ACCESS_TOKEN)
-    with aioresponses() as mocked:
-        mocked.post(const.AWAIR_URL, status=404)
-
-        with pytest.raises(AwairClient.NotFoundError):
-            resp = await awair.air_data_raw(AWAIR_GEN1_UUID)
-            assert resp.code == 404
-
-
-async def test_ratelimit_200(
-    mock_ratelimit_response,
-):  # pylint: disable=unused-argument,redefined-outer-name
-    """Test that we can raise on ratelimiting in the query body."""
-    awair = AwairClient(ACCESS_TOKEN)
-
-    with pytest.raises(AwairClient.RatelimitError):
-        resp = await awair.air_data_raw(AWAIR_GEN1_UUID)
-        assert resp.code == 200
-
-async def test_ratelimit_429(
-    mock_ratelimit_response_429,
-):  # pylint: disable=unused-argument,redefined-outer-name
-    """Test that we can raise on ratelimiting in the query body."""
-    awair = AwairClient(ACCESS_TOKEN)
-
-    with pytest.raises(AwairClient.RatelimitError):
-        resp = await awair.air_data_raw(AWAIR_GEN1_UUID)
-        assert resp.code == 429
+    with VCR.use_cassette("not_found.yaml"):
+        awair = AwairClient(ACCESS_TOKEN)
+        with patch("python_awair.const.DEVICE_URL", f"{const.USER_URL}/devicesxyz"):
+            with pytest.raises(AwairClient.NotFoundError):
+                await awair.air_data_raw(AWAIR_GEN1_TYPE, AWAIR_GEN1_ID)

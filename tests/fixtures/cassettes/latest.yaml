@@ -6,11 +6,11 @@ interactions:
       - application/json
       authorization:
       - fake_token
-    method: POST
-    uri: https://developer-apis.awair.is/graphql
+    method: GET
+    uri: https://developer-apis.awair.is/v1/users/self/devices/awair/24947/air-data/latest?fahrenheit=false
   response:
     body:
-      string: '{"data":{"AirDataLatest":{"airDataSeq":[{"timestamp":"2020-04-08T22:59:29.884Z","score":84.0,"sensors":[{"component":"TEMP","value":24.75},{"component":"HUMID","value":47.75},{"component":"CO2","value":918.0},{"component":"VOC","value":755.0},{"component":"DUST","value":14.800000190734863}],"indices":[{"component":"TEMP","value":0.0},{"component":"HUMID","value":0.0},{"component":"CO2","value":0.0},{"component":"VOC","value":1.0},{"component":"DUST","value":1.0}]}]}}}'
+      string: '{"data":[{"timestamp":"2020-04-09T04:13:15.356Z","score":88.0,"sensors":[{"comp":"temp","value":24.420000076293945},{"comp":"humid","value":47.86000061035156},{"comp":"co2","value":783.0},{"comp":"voc","value":525.0},{"comp":"dust","value":13.699999809265137}],"indices":[{"comp":"temp","value":0.0},{"comp":"humid","value":0.0},{"comp":"co2","value":0.0},{"comp":"voc","value":1.0},{"comp":"dust","value":1.0}]}]}'
     headers:
       Access-Control-Allow-Credentials: 'true'
       Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept,
@@ -18,13 +18,13 @@ interactions:
       Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
       Access-Control-Allow-Origin: '*'
       Alt-Svc: clear
-      Content-Length: '472'
       Content-Type: application/json
-      Date: Wed, 08 Apr 2020 22:59:31 GMT
+      Date: Thu, 09 Apr 2020 04:13:21 GMT
       Server: akka-http/10.1.1
+      Transfer-Encoding: chunked
       Via: 1.1 google
     status:
       code: 200
       message: OK
-    url: https://developer-apis.awair.is/graphql
+    url: https://developer-apis.awair.is/v1/users/self/devices/awair/24947/air-data/latest?fahrenheit=false
 version: 1
