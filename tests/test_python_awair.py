@@ -53,6 +53,15 @@ def mock_ratelimit_response():
             yield mocked
 
 
+@pytest.fixture
+def mock_ratelimit_response_429():
+    """Returns a mocked user query."""
+    with aioresponses() as mocked:
+        with open("tests/fixtures/ratelimit_response.json") as data:
+            mocked.post(const.AWAIR_URL, status=429, body=data.read())
+            yield mocked
+
+
 async def test_get_user():
     """Test that we can get a user response."""
     with VCR.use_cassette("user.yaml"):
@@ -154,46 +163,56 @@ async def test_get_raw():
 
 async def test_auth_failure():
     """Test that we can raise on bad auth."""
-    awair = AwairClient("bad_token")
+    awair = AwairClient(ACCESS_TOKEN)
     with aioresponses() as mocked:
         mocked.post(
             const.AWAIR_URL, status=401, body="The supplied authentication is invalid"
         )
 
         with pytest.raises(AwairClient.AuthError):
-            resp = await awair.air_data_raw("test_device")
+            resp = await awair.air_data_raw(AWAIR_GEN1_UUID)
             assert resp.code == 401
             assert resp.body == "The supplied authentication is invalid"
 
 
 async def test_bad_query():
     """Test that we can raise on bad query."""
-    awair = AwairClient("bad_token")
+    awair = AwairClient(ACCESS_TOKEN)
     with aioresponses() as mocked:
         mocked.post(const.AWAIR_URL, status=400)
 
         with pytest.raises(AwairClient.QueryError):
-            resp = await awair.air_data_raw("test_device")
+            resp = await awair.air_data_raw(AWAIR_GEN1_UUID)
             assert resp.code == 400
 
 
 async def test_not_found():
     """Test that we can raise on 404."""
-    awair = AwairClient("bad_token")
+    awair = AwairClient(ACCESS_TOKEN)
     with aioresponses() as mocked:
         mocked.post(const.AWAIR_URL, status=404)
 
         with pytest.raises(AwairClient.NotFoundError):
-            resp = await awair.air_data_raw("test_device")
+            resp = await awair.air_data_raw(AWAIR_GEN1_UUID)
             assert resp.code == 404
 
 
-async def test_ratelimit(
+async def test_ratelimit_200(
     mock_ratelimit_response,
 ):  # pylint: disable=unused-argument,redefined-outer-name
-    """Test that we can raise ratelimit."""
-    awair = AwairClient("bad_token")
+    """Test that we can raise on ratelimiting in the query body."""
+    awair = AwairClient(ACCESS_TOKEN)
 
     with pytest.raises(AwairClient.RatelimitError):
-        resp = await awair.air_data_raw("test_device")
+        resp = await awair.air_data_raw(AWAIR_GEN1_UUID)
         assert resp.code == 200
+
+async def test_ratelimit_429(
+    mock_ratelimit_response_429,
+):  # pylint: disable=unused-argument,redefined-outer-name
+    """Test that we can raise on ratelimiting in the query body."""
+    awair = AwairClient(ACCESS_TOKEN)
+
+    with pytest.raises(AwairClient.RatelimitError):
+        resp = await awair.air_data_raw(AWAIR_GEN1_UUID)
+        assert resp.code == 429

@@ -1,5 +1,6 @@
 """Python asyncio client for the Awair GraphQL API."""
 
+
 import aiohttp
 
 from python_awair import const
@@ -50,8 +51,8 @@ class AwairClient:
         }
 
         for key, value in kwargs.items():
-            if key == 'from_date':
-                key = 'from'
+            if key == "from_date":
+                key = "from"
 
             variables[key] = self._quote(value)
 
@@ -68,8 +69,8 @@ class AwairClient:
         }
 
         for key, value in kwargs.items():
-            if key == 'from_date':
-                key = 'from'
+            if key == "from_date":
+                key = "from"
 
             variables[key] = self._quote(value)
 
@@ -86,8 +87,8 @@ class AwairClient:
         }
 
         for key, value in kwargs.items():
-            if key == 'from_date':
-                key = 'from'
+            if key == "from_date":
+                key = "from"
 
             variables[key] = self._quote(value)
 
@@ -150,6 +151,12 @@ class AwairClient:
         if resp.status == 404:
             raise AwairClient.NotFoundError(
                 "The Awair API returned an unexpected HTTP 404."
+            )
+
+        if resp.status == 429:
+            raise AwairClient.RatelimitError(
+                "The ratelimit for the Awair API has been exceeded. "
+                + "Please try again later."
             )
 
         raise AwairClient.GenericError("Unable to query the Awair API.")
