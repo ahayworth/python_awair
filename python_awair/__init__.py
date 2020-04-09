@@ -29,13 +29,16 @@ class AwairClient:
     async def devices(self):
         """List devices and locations."""
         response = await self._query(const.DEVICE_URL)
-        return response.get('devices', [])
+        return response.get("devices", [])
 
     async def air_data_latest(self, type, id, fahrenheit=False):
         """Return the latest air quality measurements."""
-        url = f"{const.DEVICE_URL}/{type}/{id}/air-data/latest?fahrenheit={str(fahrenheit).lower()}"
+        url = "".join([
+            f"{const.DEVICE_URL}/{type}/{id}/air-data",
+            f"/latest?fahrenheit={str(fahrenheit).lower()}",
+        ])
         response = await self._query(url)
-        return response.get('data', [{}])[0]
+        return response.get("data", [{}])[0]
 
     async def air_data_five_minute(self, type, id, **kwargs):
         """Return the 5min summary air quality measurements."""
@@ -47,16 +50,17 @@ class AwairClient:
             for key, value in kwargs.items():
                 if key == "from_date":
                     key = "from"
-                    value = str(value).lower()
 
                 elif key == "to_date":
                     key = "to"
+
+                else:
                     value = str(value).lower()
 
                 url += f"&{key}={value}"
 
         response = await self._query(url)
-        return response.get('data', [])
+        return response.get("data", [])
 
     async def air_data_fifteen_minute(self, type, id, **kwargs):
         """Return the 15min summary air quality measurements."""
@@ -68,16 +72,17 @@ class AwairClient:
             for key, value in kwargs.items():
                 if key == "from_date":
                     key = "from"
-                    value = str(value).lower()
 
                 elif key == "to_date":
                     key = "to"
+
+                else:
                     value = str(value).lower()
 
                 url += f"&{key}={value}"
 
         response = await self._query(url)
-        return response.get('data', [])
+        return response.get("data", [])
 
     async def air_data_raw(self, type, id, **kwargs):
         """Return the 5min summary air quality measurements."""
@@ -89,24 +94,23 @@ class AwairClient:
             for key, value in kwargs.items():
                 if key == "from_date":
                     key = "from"
-                    value = str(value).lower()
 
                 elif key == "to_date":
                     key = "to"
+
+                else:
                     value = str(value).lower()
 
                 url += f"&{key}={value}"
 
         response = await self._query(url)
-        return response.get('data', [])
+        return response.get("data", [])
 
     async def _query(self, url, variables=None):
         if self._session is None:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    url,
-                    headers=self._headers,
-                    timeout=self._timeout,
+                    url, headers=self._headers, timeout=self._timeout,
                 ) as resp:
                     if resp.status == 200:
                         json = await resp.json()
@@ -136,9 +140,7 @@ class AwairClient:
             return json
 
         if resp.status == 400:
-            raise AwairClient.QueryError(
-                "The supplied parameters were invalid."
-            )
+            raise AwairClient.QueryError("The supplied parameters were invalid.")
 
         if resp.status == 401 or resp.status == 403:
             raise AwairClient.AuthError(
