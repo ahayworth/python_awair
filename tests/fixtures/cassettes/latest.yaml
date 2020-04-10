@@ -7,10 +7,10 @@ interactions:
       authorization:
       - fake_token
     method: GET
-    uri: https://developer-apis.awair.is/v1/users/self/devices/awair/24947/air-data/latest?fahrenheit=false
+    uri: https://developer-apis.awair.is/v1/users/self/devices/awair/24947/air-data/latest
   response:
     body:
-      string: '{"data":[{"timestamp":"2020-04-09T04:13:15.356Z","score":88.0,"sensors":[{"comp":"temp","value":24.420000076293945},{"comp":"humid","value":47.86000061035156},{"comp":"co2","value":783.0},{"comp":"voc","value":525.0},{"comp":"dust","value":13.699999809265137}],"indices":[{"comp":"temp","value":0.0},{"comp":"humid","value":0.0},{"comp":"co2","value":0.0},{"comp":"voc","value":1.0},{"comp":"dust","value":1.0}]}]}'
+      string: '{"data":[{"timestamp":"2020-04-09T23:18:40.317Z","score":90.0,"sensors":[{"comp":"temp","value":23.59000015258789},{"comp":"humid","value":42.75},{"comp":"co2","value":761.0},{"comp":"voc","value":441.0},{"comp":"dust","value":13.300000190734863}],"indices":[{"comp":"temp","value":0.0},{"comp":"humid","value":0.0},{"comp":"co2","value":0.0},{"comp":"voc","value":1.0},{"comp":"dust","value":1.0}]}]}'
     headers:
       Access-Control-Allow-Credentials: 'true'
       Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept,
@@ -19,12 +19,12 @@ interactions:
       Access-Control-Allow-Origin: '*'
       Alt-Svc: clear
       Content-Type: application/json
-      Date: Thu, 09 Apr 2020 04:13:21 GMT
+      Date: Thu, 09 Apr 2020 23:18:41 GMT
       Server: akka-http/10.1.1
       Transfer-Encoding: chunked
       Via: 1.1 google
     status:
       code: 200
       message: OK
-    url: https://developer-apis.awair.is/v1/users/self/devices/awair/24947/air-data/latest?fahrenheit=false
+    url: https://developer-apis.awair.is/v1/users/self/devices/awair/24947/air-data/latest
 version: 1
