@@ -3,8 +3,8 @@
 from datetime import datetime
 
 from python_awair import const
-from python_awair.sensors import Sensors
 from python_awair.indices import Indices
+from python_awair.sensors import Sensors
 
 
 class AirData:
@@ -20,10 +20,13 @@ class AirData:
         self.timestamp = datetime.strptime(attributes["timestamp"], const.DATE_FORMAT)
         self.score = attributes["score"]
 
-        self.sensors = Sensors({
-            sensor["comp"]: sensor["value"] for sensor in attributes.get("sensors", [])
-        })
+        self.sensors = Sensors(
+            {
+                sensor["comp"]: sensor["value"]
+                for sensor in attributes.get("sensors", [])
+            }
+        )
 
-        self.indices = Indices({
-            index["comp"]: index["value"] for index in attributes.get("indices", [])
-        })
+        self.indices = Indices(
+            {index["comp"]: index["value"] for index in attributes.get("indices", [])}
+        )

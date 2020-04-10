@@ -5,6 +5,7 @@ from python_awair import const
 
 class AttrDict(dict):
     """Dict with attribute-like access."""
+
     def __init__(self, attrs: dict) -> None:
         """Initialize, hiding known sensor aliases."""
         new_attrs = dict(attrs)
