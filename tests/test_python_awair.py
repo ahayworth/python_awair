@@ -252,4 +252,6 @@ async def test_air_data_handles_datetime_limits():
         await device.air_data_fifteen_minute(from_date=(now - timedelta(days=8)))
 
     with pytest.raises(ValueError):
-        await device.air_data_fifteen_minute(from_date=(now - timedelta(hours=1)), to_date=(now - timedelta(hours=3)))
+        await device.air_data_fifteen_minute(
+            from_date=(now - timedelta(hours=1)), to_date=(now - timedelta(hours=3))
+        )

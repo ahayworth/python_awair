@@ -135,8 +135,8 @@ class AwairDevice:
 
         if (to_date - from_date) > timedelta(hours=max_hours):
             raise ValueError(
-                "Difference between 'from_date' and 'to_date' must be less than " +
-                f"or equal to {max_hours} hours."
+                "Difference between 'from_date' and 'to_date' must be less than "
+                + f"or equal to {max_hours} hours."
             )
 
         if args:
