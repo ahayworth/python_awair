@@ -52,6 +52,14 @@ class AwairUser:
 
         self.client = client
 
+    def __repr__(self) -> str:
+        """Return a friendly representation."""
+        parts = [f"user_id={self.user_id}"]
+        if self.email is not None:
+            parts.append(f"email={self.email}")
+
+        return f"<AwairUser: {' '.join(parts)}>"
+
     async def devices(self) -> List[AwairDevice]:
         """Return a list of awair devices from the API."""
         response = await self.client.query(const.DEVICE_URL)

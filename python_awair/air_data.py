@@ -30,3 +30,10 @@ class AirData:
         self.indices = Indices(
             {index["comp"]: index["value"] for index in attributes.get("indices", [])}
         )
+
+    def __repr__(self) -> str:
+        """Return a friendly representation."""
+        return (
+            f"<AirData@{self.timestamp}: "
+            + f"score={round(self.score, 2)} sensors={self.sensors}>"
+        )

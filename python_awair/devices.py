@@ -2,11 +2,15 @@
 
 import urllib
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Union, cast
+from typing import List, Optional, Union
+
+import voluptuous as vol
 
 from python_awair import const
 from python_awair.air_data import AirData
 from python_awair.client import AwairClient
+
+AirDataParam = Union[datetime, bool, int, None]
 
 
 class AwairDevice:
@@ -15,6 +19,7 @@ class AwairDevice:
     device_id: int
     uuid: str
     device_type: str
+    device_model: str
     mac_address: Optional[str]
 
     latitude: Optional[float]
@@ -45,6 +50,15 @@ class AwairDevice:
 
         self.client = client
 
+    def __repr__(self) -> str:
+        """Return a friendly representation."""
+        return f"<AwairDevice: uuid={self.uuid} model={self.model}>"
+
+    @property
+    def model(self) -> str:
+        """Return the human-friendly model, if known."""
+        return const.AWAIR_MODELS.get(self.device_type, self.device_type)
+
     async def air_data_latest(self, fahrenheit: bool = False) -> Optional[AirData]:
         """Get the latest air data for this device."""
         response = await self.__get_airdata("latest", fahrenheit=fahrenheit)
@@ -53,21 +67,15 @@ class AwairDevice:
 
         return None
 
-    async def air_data_five_minute(
-        self, **kwargs: Union[datetime, bool, int, None],
-    ) -> List[AirData]:
+    async def air_data_five_minute(self, **kwargs: AirDataParam) -> List[AirData]:
         """Return the 5min summary air data for this device."""
         return await self.__get_airdata("5-min-avg", **kwargs)
 
-    async def air_data_fifteen_minute(
-        self, **kwargs: Union[datetime, bool, int, None],
-    ) -> List[AirData]:
+    async def air_data_fifteen_minute(self, **kwargs: AirDataParam) -> List[AirData]:
         """Return the 15min summary air data for this device."""
         return await self.__get_airdata("15-min-avg", **kwargs)
 
-    async def air_data_raw(
-        self, **kwargs: Union[datetime, bool, int, None],
-    ) -> List[AirData]:
+    async def air_data_raw(self, **kwargs: AirDataParam) -> List[AirData]:
         """Return the raw air data for this device."""
         return await self.__get_airdata("raw", **kwargs)
 
@@ -84,63 +92,60 @@ class AwairDevice:
         return [AirData(data) for data in response.get("data", [])]
 
     @staticmethod
-    def _format_args(kind: str, **kwargs: Union[datetime, bool, int, None]) -> str:
-        args: Dict[str, str] = {}
+    def _format_args(kind: str, **kwargs: AirDataParam) -> str:
+        max_limit = {"raw": 360, "5-min-avg": 288, "15-min-avg": 672}
+        max_hours = {"raw": 1, "15-min-avg": 168, "5-min-avg": 24}
 
-        boolean_args = ("fahrenheit", "desc")
-        numeric_args = {"limit": {"raw": 360, "5-min-avg": 288, "15-min-avg": 672}}
-        time_args = ("from_date", "to_date")
-        default_hours = {"raw": 1, "15-min-avg": 168, "5-min-avg": 24}
+        def validate_hours(params: dict) -> dict:
+            hour_limit = max_hours.get(kind, 24)
+            right_now = datetime.now()
+            from_date = params.get("from_date", right_now - timedelta(hours=hour_limit))
+            to_date = params.get("to_date", right_now)
 
-        right_now = datetime.now()
-        max_hours = default_hours.get(kind, 24)
-        from_date = right_now - timedelta(hours=max_hours)
-        to_date = right_now
+            if not hasattr(from_date, "now") or not hasattr(to_date, "now"):
+                raise vol.Invalid(
+                    "Expected 'from_date' and/or 'to_date' to be instances of datetime"
+                )
 
-        for arg, val in kwargs.items():
-            if arg in boolean_args:
-                sval = str(val).lower()
-                if sval not in ("true", "false"):
-                    raise ValueError(f"'{arg}' must be True or False")
-                args[arg] = sval
+            if from_date > right_now or to_date > right_now:
+                raise vol.Invalid("Dates cannot be in the future!")
+            if from_date > to_date:
+                raise vol.Invalid("'from_date' cannot be greater than 'to_date'.")
+            if (to_date - from_date) > timedelta(hours=hour_limit):
+                raise vol.Invalid(
+                    "Difference between 'from_date' and 'to_date' must be less than "
+                    + f"or equal to {hour_limit} hours."
+                )
 
-            if arg in numeric_args.keys():
-                max_val = numeric_args[arg][kind]
-                if not isinstance(val, int):
-                    raise ValueError(f"'{arg} must be an integer.")
+            if "from_date" in params:
+                params["from_date"] = str(params["from_date"])
 
-                if val < 1 or val > max_val:
-                    raise ValueError(
-                        f"'{arg}' must be between 1 and {max_val}, or unspecified."
-                    )
+            if "to_date" in params:
+                params["to_date"] = str(params["to_date"])
 
-                args[arg] = str(val)
+            return params
 
-            if arg in time_args:
-                if not hasattr(val, "now"):
-                    raise ValueError(f"'{arg}' must be an instance of datetime.")
-
-                # Having a hard time with tests and MagicMock, surprise surprise.
-                val = cast(datetime, val)
-                if val > right_now:
-                    raise ValueError(f"'{arg}' cannot be in the future.")
-
-                if arg == "from_date":
-                    from_date = val
-                if arg == "to_date":
-                    to_date = val
-
-                args[arg] = str(val)
-
-        if from_date > to_date:
-            raise ValueError("'from_date' cannot be greater than 'to_date'.")
-
-        if (to_date - from_date) > timedelta(hours=max_hours):
-            raise ValueError(
-                "Difference between 'from_date' and 'to_date' must be less than "
-                + f"or equal to {max_hours} hours."
+        schema = vol.Schema(
+            vol.All(
+                {
+                    vol.Optional("fahrenheit"): vol.All(
+                        bool, vol.Coerce(str), vol.Lower
+                    ),
+                    vol.Optional("desc"): vol.All(bool, vol.Coerce(str), vol.Lower),
+                    vol.Optional("limit"): vol.All(
+                        int,
+                        vol.Range(min=1, max=max_limit.get(kind, 1)),
+                        vol.Coerce(str),
+                    ),
+                    # We validate dates by hand because it's annoying af with mocking.
+                    vol.Optional("from_date"): object,
+                    vol.Optional("to_date"): object,
+                },
+                validate_hours,
             )
+        )
 
+        args = schema(kwargs)
         if args:
             return "?" + urllib.parse.urlencode(args)
 

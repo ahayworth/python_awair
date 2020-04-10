@@ -13,3 +13,13 @@ SENSOR_TO_ALIAS = {
     "lux": "illuminance",
     "spl_a": "sound_pressure_level",
 }
+
+AWAIR_MODELS = {
+    "awair": "Awair",
+    "awair-glow": "Awair Glow",
+    "awair-mint": "Awair Mint",
+    "awair-omni": "Awair Omni",
+    "awair-r2": "Awair 2nd Edition",
+    "awair-glow-c": "Awair Glow C",
+    "awair-element": "Awair Element",
+}

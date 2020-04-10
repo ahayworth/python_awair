@@ -10,6 +10,7 @@ from unittest.mock import patch
 import aiohttp
 import pytest
 import vcr
+import voluptuous as vol
 from aioresponses import aioresponses
 
 from python_awair import Awair, const
@@ -409,10 +410,10 @@ async def test_air_data_handles_boolean_attributes():
     awair = Awair(ACCESS_TOKEN)
     device = mock_awair_device(client=awair.client)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(vol.Invalid):
         await device.air_data_raw(desc=None)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(vol.Invalid):
         await device.air_data_raw(fahrenheit=1)
 
 
@@ -421,16 +422,16 @@ async def test_air_data_handles_numeric_limits():
     awair = Awair(ACCESS_TOKEN)
     device = mock_awair_device(client=awair.client)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(vol.Invalid):
         await device.air_data_raw(limit=-1)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(vol.Invalid):
         await device.air_data_raw(limit=361)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(vol.Invalid):
         await device.air_data_five_minute(limit=289)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(vol.Invalid):
         await device.air_data_fifteen_minute(limit=673)
 
 
@@ -441,22 +442,22 @@ async def test_air_data_handles_datetime_limits():
 
     now = datetime.now()
 
-    with pytest.raises(ValueError):
+    with pytest.raises(vol.Invalid):
         await device.air_data_raw(from_date=(now + timedelta(hours=1)))
 
-    with pytest.raises(ValueError):
+    with pytest.raises(vol.Invalid):
         await device.air_data_raw(from_date=False)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(vol.Invalid):
         await device.air_data_raw(from_date=(now - timedelta(hours=2)))
 
-    with pytest.raises(ValueError):
+    with pytest.raises(vol.Invalid):
         await device.air_data_five_minute(from_date=(now - timedelta(hours=25)))
 
-    with pytest.raises(ValueError):
+    with pytest.raises(vol.Invalid):
         await device.air_data_fifteen_minute(from_date=(now - timedelta(days=8)))
 
-    with pytest.raises(ValueError):
+    with pytest.raises(vol.Invalid):
         await device.air_data_fifteen_minute(
             from_date=(now - timedelta(hours=1)), to_date=(now - timedelta(hours=3))
         )
