@@ -1,9 +1,10 @@
 """Wrapper class for awair airdata responses."""
 
 from datetime import datetime
-from typing import Dict
 
 from python_awair import const
+from python_awair.sensors import Sensors
+from python_awair.indices import Indices
 
 
 class AirData:
@@ -11,22 +12,18 @@ class AirData:
 
     timestamp: datetime
     score: float
-
-    # TODO: use attributes directly?
-    sensors: Dict[str, float]
-
-    # TODO: use attributes directly?
-    indices: Dict[str, float]
+    sensors: Sensors
+    indices: Indices
 
     def __init__(self, attributes: dict) -> None:
         """Initialize from API data."""
         self.timestamp = datetime.strptime(attributes["timestamp"], const.DATE_FORMAT)
         self.score = attributes["score"]
 
-        self.sensors = {
+        self.sensors = Sensors({
             sensor["comp"]: sensor["value"] for sensor in attributes.get("sensors", [])
-        }
+        })
 
-        self.indices = {
+        self.indices = Indices({
             index["comp"]: index["value"] for index in attributes.get("indices", [])
-        }
+        })

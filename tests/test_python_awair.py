@@ -3,6 +3,7 @@
 import os
 import re
 from collections import namedtuple
+from contextlib import contextmanager
 from datetime import date, datetime, timedelta
 from unittest.mock import patch
 
@@ -25,6 +26,26 @@ MOCK_GEN1_DEVICE_ATTRS = {
     "deviceType": AWAIR_GEN1_TYPE,
     "deviceUUID": f"{AWAIR_GEN1_TYPE}_{AWAIR_GEN1_ID}",
 }
+MOCK_OMNI_DEVICE_ATTRS = {
+    "deviceId": 755,
+    "deviceType": "awair-omni",
+    "deviceUUID": "awair-omni_755",
+}
+MOCK_MINT_DEVICE_ATTRS = {
+    "deviceId": 3665,
+    "deviceType": "awair-mint",
+    "deviceUUID": "awair-mint_3665",
+}
+MOCK_GEN2_DEVICE_ATTRS = {
+    "deviceId": 5709,
+    "deviceType": "awair-r2",
+    "deviceUUID": "awair-r2_5709",
+}
+MOCK_GLOW_DEVICE_ATTRS = {
+    "deviceId": 1405,
+    "deviceType": "awair-glow",
+    "deviceUUID": "awair-glow_1405",
+}
 MOCK_USER_ATTRS = {"id": "32406"}
 
 
@@ -33,9 +54,11 @@ def mock_awair_user(client: AwairClient) -> AwairUser:
     return AwairUser(client=client, attributes=MOCK_USER_ATTRS)
 
 
-def mock_awair_device(client: AwairClient) -> AwairDevice:
+def mock_awair_device(
+    client: AwairClient, device: dict = MOCK_GEN1_DEVICE_ATTRS
+) -> AwairDevice:
     """Return a mock awair device."""
-    return AwairDevice(client=client, attributes=MOCK_GEN1_DEVICE_ATTRS)
+    return AwairDevice(client=client, attributes=device)
 
 
 Scrubber = namedtuple("Scrubber", ["pattern", "replacement"])
@@ -66,6 +89,16 @@ VCR = vcr.VCR(
     decode_compressed_response=True,
     before_record_response=scrub,
 )
+
+
+@contextmanager
+def time_travel(target: datetime):
+    """Manage time in our tests."""
+    with patch("python_awair.devices.datetime") as mock_date:
+        mock_date.now.return_value = target
+        mock_date.side_effect = datetime
+
+        yield
 
 
 async def test_get_user():
@@ -113,59 +146,231 @@ async def test_get_devices():
 
 async def test_get_latest():
     """Test that we can get the latest air data."""
-    with VCR.use_cassette("latest.yaml"):
+    target = datetime(2020, 4, 10, 10, 38, 30)
+    with VCR.use_cassette("latest.yaml"), time_travel(target):
         awair = Awair(ACCESS_TOKEN)
         device = mock_awair_device(client=awair.client)
         resp = await device.air_data_latest()
 
-    assert resp.timestamp == datetime(2020, 4, 9, 23, 18, 40, 317000)
-    assert resp.score == 90.0
-    assert resp.sensors["temp"] == 23.59000015258789
-    assert resp.indices["temp"] == 0.0
+    assert resp.timestamp == datetime(2020, 4, 10, 15, 38, 24, 111000)
+    assert resp.score == 88.0
+    assert resp.sensors["temperature"] == 21.770000457763672
+    assert resp.indices["temperature"] == -1.0
 
 
-# TODO I think we're outside of bounds?
 async def test_get_five_minute():
     """Test that we can get the five-minute avg air data."""
-    with VCR.use_cassette("five_minute.yaml"):
+    target = datetime(2020, 4, 10, 10, 38, 31, 2883)
+    with VCR.use_cassette("five_minute.yaml"), time_travel(target):
         awair = Awair(ACCESS_TOKEN)
         device = mock_awair_device(client=awair.client)
         resp = await device.air_data_five_minute(
-            from_date=datetime(2020, 4, 8, 22, 59, 29)
+            from_date=(target - timedelta(minutes=30))
         )
 
-    assert resp[0].timestamp == datetime(2020, 4, 9, 23, 15)
-    assert resp[0].score == 89.8695652173913
-    assert resp[0].sensors["temp"] == 23.660434805828594
-    assert resp[0].indices["temp"] == 0.0
+    assert resp[0].timestamp == datetime(2020, 4, 10, 15, 35)
+    assert resp[0].score == 88.0
+    assert resp[0].sensors["temperature"] == 21.777143478393555
+    assert resp[0].indices["temperature"] == -1.0
 
 
 async def test_get_fifteen_minute():
     """Test that we can get the fifteen-minute avg air data."""
+    target = datetime(2020, 4, 10, 10, 38, 31, 252873)
     with VCR.use_cassette("fifteen_minute.yaml"):
         awair = Awair(ACCESS_TOKEN)
         device = mock_awair_device(client=awair.client)
         resp = await device.air_data_fifteen_minute(
-            from_date=datetime(2020, 4, 8, 22, 59, 29)
+            from_date=(target - timedelta(minutes=30))
         )
 
-    assert resp[0].timestamp == datetime(2020, 4, 9, 23, 15)
-    assert resp[0].score == 89.8695652173913
-    assert resp[0].sensors["temp"] == 23.660434805828594
-    assert resp[0].indices["temp"] == 0.0
+    assert resp[0].timestamp == datetime(2020, 4, 10, 15, 30)
+    assert resp[0].score == 88.0
+    assert resp[0].sensors["temperature"] == 21.791961108936984
+    assert resp[0].indices["temperature"] == -1.0
 
 
 async def test_get_raw():
     """Test that we can get the raw air data."""
-    with VCR.use_cassette("raw.yaml"):
+    target = datetime(2020, 4, 10, 10, 38, 31, 720296)
+    with VCR.use_cassette("raw.yaml"), time_travel(target):
         awair = Awair(ACCESS_TOKEN)
         device = mock_awair_device(client=awair.client)
-        resp = await device.air_data_raw(from_date=datetime(2020, 4, 8, 22, 59, 29))
+        resp = await device.air_data_raw(from_date=(target - timedelta(minutes=30)))
 
-    assert resp[0].timestamp == datetime(2020, 4, 9, 23, 18, 40, 317000)
-    assert resp[0].score == 90.0
-    assert resp[0].sensors["temp"] == 23.59000015258789
-    assert resp[0].indices["temp"] == 0.0
+    assert resp[0].timestamp == datetime(2020, 4, 10, 15, 38, 24, 111000)
+    assert resp[0].score == 88.0
+    assert resp[0].sensors["temperature"] == 21.770000457763672
+    assert resp[0].indices["temperature"] == -1.0
+
+
+async def test_sensor_creation_gen1():
+    """Test that an Awair gen 1 creates expected sensors."""
+    target = datetime(2020, 4, 10, 10, 38, 30)
+    with VCR.use_cassette("latest.yaml"), time_travel(target):
+        awair = Awair(ACCESS_TOKEN)
+        device = mock_awair_device(client=awair.client)
+        resp = await device.air_data_latest()
+
+    assert hasattr(resp, "timestamp")
+    assert hasattr(resp, "score")
+    assert hasattr(resp, "sensors")
+    assert hasattr(resp, "indices")
+    expected_sensors = [
+        "humidity",
+        "temperature",
+        "carbon_dioxide",
+        "volatile_organic_compounds",
+        "dust",
+    ]
+    assert len(resp.sensors) == len(expected_sensors)
+    assert len(resp.indices) == len(expected_sensors)
+    for sensor in expected_sensors:
+        assert hasattr(resp.sensors, sensor)
+        assert hasattr(resp.indices, sensor)
+
+
+async def test_sensor_creation_omni():
+    """Test that an Awair omni creates expected sensors."""
+    target = datetime(2020, 4, 10, 10, 38, 30)
+    with VCR.use_cassette("omni.yaml"), time_travel(target):
+        awair = Awair(ACCESS_TOKEN)
+        device = mock_awair_device(client=awair.client, device=MOCK_OMNI_DEVICE_ATTRS)
+        resp = await device.air_data_latest()
+
+    assert hasattr(resp, "timestamp")
+    assert hasattr(resp, "score")
+    assert hasattr(resp, "sensors")
+    assert hasattr(resp, "indices")
+
+    expected_sensors = [
+        "humidity",
+        "temperature",
+        "carbon_dioxide",
+        "volatile_organic_compounds",
+        "particulate_matter_2_5",
+        "illuminance",
+        "sound_pressure_level",
+    ]
+    assert len(resp.sensors) == len(expected_sensors)
+    for sensor in expected_sensors:
+        assert hasattr(resp.sensors, sensor)
+
+    expected_indices = [
+        "humidity",
+        "temperature",
+        "carbon_dioxide",
+        "volatile_organic_compounds",
+        "particulate_matter_2_5",
+    ]
+    assert len(resp.indices) == len(expected_indices)
+    for sensor in expected_indices:
+        assert hasattr(resp.indices, sensor)
+
+
+async def test_sensor_creation_mint():
+    """Test that an Awair mint creates expected sensors."""
+    target = datetime(2020, 4, 10, 10, 38, 30)
+    with VCR.use_cassette("mint.yaml"), time_travel(target):
+        awair = Awair(ACCESS_TOKEN)
+        device = mock_awair_device(client=awair.client, device=MOCK_MINT_DEVICE_ATTRS)
+        resp = await device.air_data_latest()
+
+    assert hasattr(resp, "timestamp")
+    assert hasattr(resp, "score")
+    assert hasattr(resp, "sensors")
+    assert hasattr(resp, "indices")
+
+    expected_sensors = [
+        "humidity",
+        "temperature",
+        "volatile_organic_compounds",
+        "particulate_matter_2_5",
+        "illuminance",
+    ]
+    assert len(resp.sensors) == len(expected_sensors)
+    for sensor in expected_sensors:
+        assert hasattr(resp.sensors, sensor)
+
+    expected_indices = [
+        "humidity",
+        "temperature",
+        "volatile_organic_compounds",
+        "particulate_matter_2_5",
+    ]
+    assert len(resp.indices) == len(expected_indices)
+    for sensor in expected_indices:
+        assert hasattr(resp.indices, sensor)
+
+
+async def test_sensor_creation_gen2():
+    """Test that an Awair gen2 creates expected sensors."""
+    target = datetime(2020, 4, 10, 10, 38, 30)
+    with VCR.use_cassette("awair-r2.yaml"), time_travel(target):
+        awair = Awair(ACCESS_TOKEN)
+        device = mock_awair_device(client=awair.client, device=MOCK_GEN2_DEVICE_ATTRS)
+        resp = await device.air_data_latest()
+
+    assert hasattr(resp, "timestamp")
+    assert hasattr(resp, "score")
+    assert hasattr(resp, "sensors")
+    assert hasattr(resp, "indices")
+
+    expected_sensors = [
+        "humidity",
+        "temperature",
+        "volatile_organic_compounds",
+        "particulate_matter_2_5",
+        "carbon_dioxide",
+    ]
+    assert len(resp.sensors) == len(expected_sensors)
+    for sensor in expected_sensors:
+        assert hasattr(resp.sensors, sensor)
+
+    expected_indices = [
+        "humidity",
+        "temperature",
+        "volatile_organic_compounds",
+        "particulate_matter_2_5",
+        "carbon_dioxide",
+    ]
+    assert len(resp.indices) == len(expected_indices)
+    for sensor in expected_indices:
+        assert hasattr(resp.indices, sensor)
+
+
+async def test_sensor_creation_glow():
+    """Test that an Awair glow creates expected sensors."""
+    target = datetime(2020, 4, 10, 10, 38, 30)
+    with VCR.use_cassette("glow.yaml"), time_travel(target):
+        awair = Awair(ACCESS_TOKEN)
+        device = mock_awair_device(client=awair.client, device=MOCK_GLOW_DEVICE_ATTRS)
+        resp = await device.air_data_latest()
+
+    assert hasattr(resp, "timestamp")
+    assert hasattr(resp, "score")
+    assert hasattr(resp, "sensors")
+    assert hasattr(resp, "indices")
+
+    expected_sensors = [
+        "humidity",
+        "temperature",
+        "volatile_organic_compounds",
+        "carbon_dioxide",
+    ]
+    assert len(resp.sensors) == len(expected_sensors)
+    for sensor in expected_sensors:
+        assert hasattr(resp.sensors, sensor)
+
+    expected_indices = [
+        "humidity",
+        "temperature",
+        "volatile_organic_compounds",
+        "carbon_dioxide",
+    ]
+    assert len(resp.indices) == len(expected_indices)
+    for sensor in expected_indices:
+        assert hasattr(resp.indices, sensor)
 
 
 async def test_auth_failure():

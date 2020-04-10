@@ -1,5 +1,7 @@
 """Wrapper class to query the Awair API."""
 
+from typing import NoReturn
+
 import aiohttp
 
 
@@ -20,6 +22,7 @@ class AwairClient:
 
     # TODO: refactor, too many branches.
     async def query(self, url: str) -> dict:
+        """Query the Awair api, and handle errors."""
         if self._session is None:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
@@ -34,24 +37,37 @@ class AwairClient:
                 if resp.status == 200:
                     json = await resp.json()
 
-        if resp.status == 200:
-            if "errors" in json:
-                errors = json["errors"]
+        if resp.status != 200:
+            self.__handle_error(resp)
 
-                ratelimit = False
-                for error in errors:
-                    if "Too many requests" in error["message"]:
-                        ratelimit = True
-                        break
+        return self.__check_200_errors(json)
 
-                if ratelimit:
+    @staticmethod
+    def __check_200_errors(json: dict) -> dict:
+        """Check for an "errors" array and process it.
+
+        Holdover from the GraphQL API, unclear if we could still get messages like this.
+        """
+        if "errors" in json:
+            messages = []
+            for error in json["errors"]:
+                if "Too many requests" in error["message"]:
                     raise AwairClient.RatelimitError(
                         "The ratelimit for the Awair API has been exceeded. "
                         + "Please try again later."
                     )
 
-            return json
+                messages.append(error.get("message", "Unknown error"))
 
+            if messages:
+                raise AwairClient.GenericError(
+                    f"Error querying the Awair API: {messages}"
+                )
+
+        return json
+
+    @staticmethod
+    def __handle_error(resp: aiohttp.ClientResponse) -> NoReturn:
         if resp.status == 400:
             raise AwairClient.QueryError("The supplied parameters were invalid.")
 

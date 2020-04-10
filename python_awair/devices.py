@@ -2,7 +2,7 @@
 
 import urllib
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Union
+from typing import cast, Dict, List, Optional, Union
 
 from python_awair import const
 from python_awair.air_data import AirData
@@ -117,9 +117,11 @@ class AwairDevice:
                 args[arg] = str(val)
 
             if arg in time_args:
-                if not isinstance(val, datetime):
+                if not hasattr(val, "now"):
                     raise ValueError(f"'{arg}' must be an instance of datetime.")
 
+                # Having a hard time with tests and MagicMock, surprise surprise.
+                val = cast(datetime, val)
                 if val > right_now:
                     raise ValueError(f"'{arg}' cannot be in the future.")
 
