@@ -2,7 +2,7 @@
 
 import urllib
 from datetime import datetime, timedelta
-from typing import cast, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, cast
 
 from python_awair import const
 from python_awair.air_data import AirData
