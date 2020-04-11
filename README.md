@@ -2,7 +2,7 @@
 
 ![Latest PyPI version](https://img.shields.io/pypi/v/python_awair.svg)
 ![CI](https://github.com/ahayworth/python_awair/workflows/CI/badge.svg?branch=master)
-![Coveralls](https://coveralls.io/repos/github/ahayworth/python_awair/badge.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/ahayworth/python_awair/badge.svg?branch=master)](https://coveralls.io/github/ahayworth/python_awair?branch=master)
 
 This is a WIP library to access the Awair API.
 Features:
