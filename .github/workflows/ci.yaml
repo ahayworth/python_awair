@@ -40,7 +40,7 @@ jobs:
         if: matrix.python-version == '3.8'
       - name: Coverage
         run: |
-          poetry run codecov
+          poetry run tox -e coverage
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         if: matrix.python-version == '3.8'

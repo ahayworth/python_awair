@@ -72,7 +72,10 @@ commands =
 
 [testenv:coverage]
 whitelist_externals = poetry
-commands = poetry run pytest --cov=python_awair {posargs}
+passenv = CI CODECOV* GITHUB_ACTION GITHUB_REF GITHUB_REPOSITORY GITHUB_HEAD_REF GITHUB_SHA GITHUB_RUN_ID
+commands =
+  poetry run pytest --cov=python_awair {posargs}
+  codecov
 """
 
 [build-system]
