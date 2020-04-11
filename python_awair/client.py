@@ -2,7 +2,7 @@
 
 from typing import NoReturn
 
-from aiohttp import ClientSession, ClientResponse
+from aiohttp import ClientResponse, ClientSession
 
 from python_awair.auth import AwairAuth
 from python_awair.exceptions import (
@@ -17,9 +17,7 @@ from python_awair.exceptions import (
 class AwairClient:
     """Python asyncio client for the Awair GraphQL API."""
 
-    def __init__(
-        self, authenticator: AwairAuth, session: ClientSession,
-    ) -> None:
+    def __init__(self, authenticator: AwairAuth, session: ClientSession,) -> None:
         """Initialize an AwairClient with sensible defaults."""
         self.__authenticator = authenticator
         self.__session = session

@@ -5,8 +5,8 @@ import re
 from collections import namedtuple
 from contextlib import contextmanager
 from datetime import date, datetime, timedelta
-from unittest.mock import patch
 from typing import Optional
+from unittest.mock import patch
 
 import aiohttp
 import pytest
