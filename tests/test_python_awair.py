@@ -1,110 +1,23 @@
 """Test basic python_awair functionality."""
 
-import os
-import re
-from collections import namedtuple
-from contextlib import contextmanager
 from datetime import date, datetime, timedelta
-from typing import Optional
 from unittest.mock import patch
 
 import aiohttp
 import pytest
-import vcr
 import voluptuous as vol
 
 from python_awair import Awair, const
-from python_awair.client import AwairClient
-from python_awair.devices import AwairDevice
 from python_awair.exceptions import AuthError, AwairError, NotFoundError, QueryError
-from python_awair.user import AwairUser
-from tests.utils import SillyAuth
-
-ACCESS_TOKEN = os.environ.get("AWAIR_ACCESS_TOKEN", "abcdefg")
-
-AWAIR_GEN1_TYPE = "awair"
-AWAIR_GEN1_ID = 24947
-MOCK_GEN1_DEVICE_ATTRS = {
-    "deviceId": AWAIR_GEN1_ID,
-    "deviceType": AWAIR_GEN1_TYPE,
-    "deviceUUID": f"{AWAIR_GEN1_TYPE}_{AWAIR_GEN1_ID}",
-}
-MOCK_OMNI_DEVICE_ATTRS = {
-    "deviceId": 755,
-    "deviceType": "awair-omni",
-    "deviceUUID": "awair-omni_755",
-}
-MOCK_MINT_DEVICE_ATTRS = {
-    "deviceId": 3665,
-    "deviceType": "awair-mint",
-    "deviceUUID": "awair-mint_3665",
-}
-MOCK_GEN2_DEVICE_ATTRS = {
-    "deviceId": 5709,
-    "deviceType": "awair-r2",
-    "deviceUUID": "awair-r2_5709",
-}
-MOCK_GLOW_DEVICE_ATTRS = {
-    "deviceId": 1405,
-    "deviceType": "awair-glow",
-    "deviceUUID": "awair-glow_1405",
-}
-MOCK_USER_ATTRS = {"id": "32406"}
-
-
-def mock_awair_user(client: AwairClient) -> AwairUser:
-    """Return a mock awair user."""
-    return AwairUser(client=client, attributes=MOCK_USER_ATTRS)
-
-
-def mock_awair_device(
-    client: AwairClient, device: Optional[dict] = None,
-) -> AwairDevice:
-    """Return a mock awair device."""
-    if not device:
-        device = MOCK_GEN1_DEVICE_ATTRS
-
-    return AwairDevice(client=client, attributes=device)
-
-
-Scrubber = namedtuple("Scrubber", ["pattern", "replacement"])
-SCRUBBERS = [
-    Scrubber(pattern=r'"email":"[^"]+"', replacement='"email":"foo@bar.com"'),
-    Scrubber(pattern=r'"dobYear":\d+', replacement='"dobYear":2020'),
-    Scrubber(pattern=r'"dobMonth":\d+', replacement='"dobMonth":4'),
-    Scrubber(pattern=r'"dobDay":\d+', replacement='"dobDay":8'),
-    Scrubber(pattern=r'"latitude":-?\d+\.\d+', replacement='"latitude":0.0'),
-    Scrubber(pattern=r'"longitude":-?\d+\.\d+', replacement='"longitude":0.0'),
-]
-
-
-def scrub(response):
-    """Scrub sensitive data."""
-    body = response["body"]["string"].decode("utf-8")
-    for scrubber in SCRUBBERS:
-        body = re.sub(scrubber.pattern, scrubber.replacement, body)
-
-    response["body"]["string"] = body.encode("utf-8")
-    return response
-
-
-VCR = vcr.VCR(
-    cassette_library_dir="tests/fixtures/cassettes",
-    record_mode="none",
-    filter_headers=[("authorization", "fake_token")],
-    decode_compressed_response=True,
-    before_record_response=scrub,
+from tests.const import (
+    ACCESS_TOKEN,
+    AWAIR_GEN1_ID,
+    MOCK_GEN2_DEVICE_ATTRS,
+    MOCK_GLOW_DEVICE_ATTRS,
+    MOCK_MINT_DEVICE_ATTRS,
+    MOCK_OMNI_DEVICE_ATTRS,
 )
-
-
-@contextmanager
-def time_travel(target: datetime):
-    """Manage time in our tests."""
-    with patch("python_awair.devices.datetime") as mock_date:
-        mock_date.now.return_value = target
-        mock_date.side_effect = datetime
-
-        yield
+from tests.utils import VCR, SillyAuth, mock_awair_device, mock_awair_user, time_travel
 
 
 async def test_get_user():
