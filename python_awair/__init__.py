@@ -1,10 +1,14 @@
 """Python asyncio client for the Awair GraphQL API."""
 
 
-import aiohttp
+from typing import Optional
+
+from aiohttp import ClientSession
 
 from python_awair import const
+from python_awair.auth import AccessTokenAuth, AwairAuth
 from python_awair.client import AwairClient
+from python_awair.exceptions import AwairError
 from python_awair.user import AwairUser
 
 
@@ -14,10 +18,18 @@ class Awair:
     client: AwairClient
 
     def __init__(
-        self, access_token, session=None, timeout=aiohttp.client.DEFAULT_TIMEOUT
+        self,
+        session: ClientSession,
+        access_token: Optional[str] = None,
+        authenticator: Optional[AwairAuth] = None,
     ) -> None:
         """Initialize the Awair API wrapper."""
-        self.client = AwairClient(access_token, session, timeout)
+        if authenticator:
+            self.client = AwairClient(authenticator, session)
+        elif access_token:
+            self.client = AwairClient(AccessTokenAuth(access_token), session)
+        else:
+            raise AwairError("No authentication supplied!")
 
     async def user(self) -> AwairUser:
         """Yield user data."""

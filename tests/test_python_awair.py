@@ -6,17 +6,19 @@ from collections import namedtuple
 from contextlib import contextmanager
 from datetime import date, datetime, timedelta
 from unittest.mock import patch
+from typing import Optional
 
 import aiohttp
 import pytest
 import vcr
 import voluptuous as vol
-from aioresponses import aioresponses
 
 from python_awair import Awair, const
 from python_awair.client import AwairClient
 from python_awair.devices import AwairDevice
+from python_awair.exceptions import AuthError, AwairError, NotFoundError, QueryError
 from python_awair.user import AwairUser
+from tests.utils import SillyAuth
 
 ACCESS_TOKEN = os.environ.get("AWAIR_ACCESS_TOKEN", "abcdefg")
 
@@ -56,9 +58,12 @@ def mock_awair_user(client: AwairClient) -> AwairUser:
 
 
 def mock_awair_device(
-    client: AwairClient, device: dict = MOCK_GEN1_DEVICE_ATTRS
+    client: AwairClient, device: Optional[dict] = None,
 ) -> AwairDevice:
     """Return a mock awair device."""
+    if not device:
+        device = MOCK_GEN1_DEVICE_ATTRS
+
     return AwairDevice(client=client, attributes=device)
 
 
@@ -104,24 +109,9 @@ def time_travel(target: datetime):
 
 async def test_get_user():
     """Test that we can get a user response."""
-    with VCR.use_cassette("user.yaml"):
-        awair = Awair(ACCESS_TOKEN)
-        user = await awair.user()
-
-    assert user.user_id == "32406"
-    assert user.email == "foo@bar.com"
-    assert user.first_name == "Andrew"
-    assert user.dob == date(year=2020, month=4, day=8)
-    assert user.tier == "Large_developer"
-    assert user.permissions["FIFTEEN_MIN"] == 30000
-    assert user.usages["USER_INFO"] == 80
-
-
-async def test_get_user_with_session():
-    """Test that we can get a user response with an explicit session."""
     async with aiohttp.ClientSession() as session:
         with VCR.use_cassette("user.yaml"):
-            awair = Awair(ACCESS_TOKEN, session=session)
+            awair = Awair(session=session, access_token=ACCESS_TOKEN)
             user = await awair.user()
 
     assert user.user_id == "32406"
@@ -133,12 +123,24 @@ async def test_get_user_with_session():
     assert user.usages["USER_INFO"] == 80
 
 
+async def test_custom_auth():
+    """Test that we can use the API with a custom auth class."""
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("custom_auth.yaml"):
+            auth = SillyAuth(access_token=ACCESS_TOKEN)
+            awair = Awair(session=session, authenticator=auth)
+            user = await awair.user()
+
+    assert user.user_id == "32406"
+
+
 async def test_get_devices():
     """Test that we can get a list of devices."""
-    with VCR.use_cassette("devices.yaml"):
-        awair = Awair(ACCESS_TOKEN)
-        user = mock_awair_user(client=awair.client)
-        devices = await user.devices()
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("devices.yaml"):
+            awair = Awair(session=session, access_token=ACCESS_TOKEN)
+            user = mock_awair_user(client=awair.client)
+            devices = await user.devices()
 
     assert devices[0].device_id == AWAIR_GEN1_ID
     assert devices[0].device_type == "awair"
@@ -148,10 +150,11 @@ async def test_get_devices():
 async def test_get_latest():
     """Test that we can get the latest air data."""
     target = datetime(2020, 4, 10, 10, 38, 30)
-    with VCR.use_cassette("latest.yaml"), time_travel(target):
-        awair = Awair(ACCESS_TOKEN)
-        device = mock_awair_device(client=awair.client)
-        resp = await device.air_data_latest()
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("latest.yaml"), time_travel(target):
+            awair = Awair(session=session, access_token=ACCESS_TOKEN)
+            device = mock_awair_device(client=awair.client)
+            resp = await device.air_data_latest()
 
     assert resp.timestamp == datetime(2020, 4, 10, 15, 38, 24, 111000)
     assert resp.score == 88.0
@@ -162,12 +165,13 @@ async def test_get_latest():
 async def test_get_five_minute():
     """Test that we can get the five-minute avg air data."""
     target = datetime(2020, 4, 10, 10, 38, 31, 2883)
-    with VCR.use_cassette("five_minute.yaml"), time_travel(target):
-        awair = Awair(ACCESS_TOKEN)
-        device = mock_awair_device(client=awair.client)
-        resp = await device.air_data_five_minute(
-            from_date=(target - timedelta(minutes=30))
-        )
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("five_minute.yaml"), time_travel(target):
+            awair = Awair(session=session, access_token=ACCESS_TOKEN)
+            device = mock_awair_device(client=awair.client)
+            resp = await device.air_data_five_minute(
+                from_date=(target - timedelta(minutes=30))
+            )
 
     assert resp[0].timestamp == datetime(2020, 4, 10, 15, 35)
     assert resp[0].score == 88.0
@@ -178,12 +182,13 @@ async def test_get_five_minute():
 async def test_get_fifteen_minute():
     """Test that we can get the fifteen-minute avg air data."""
     target = datetime(2020, 4, 10, 10, 38, 31, 252873)
-    with VCR.use_cassette("fifteen_minute.yaml"):
-        awair = Awair(ACCESS_TOKEN)
-        device = mock_awair_device(client=awair.client)
-        resp = await device.air_data_fifteen_minute(
-            from_date=(target - timedelta(minutes=30))
-        )
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("fifteen_minute.yaml"):
+            awair = Awair(session=session, access_token=ACCESS_TOKEN)
+            device = mock_awair_device(client=awair.client)
+            resp = await device.air_data_fifteen_minute(
+                from_date=(target - timedelta(minutes=30))
+            )
 
     assert resp[0].timestamp == datetime(2020, 4, 10, 15, 30)
     assert resp[0].score == 88.0
@@ -194,10 +199,11 @@ async def test_get_fifteen_minute():
 async def test_get_raw():
     """Test that we can get the raw air data."""
     target = datetime(2020, 4, 10, 10, 38, 31, 720296)
-    with VCR.use_cassette("raw.yaml"), time_travel(target):
-        awair = Awair(ACCESS_TOKEN)
-        device = mock_awair_device(client=awair.client)
-        resp = await device.air_data_raw(from_date=(target - timedelta(minutes=30)))
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("raw.yaml"), time_travel(target):
+            awair = Awair(session=session, access_token=ACCESS_TOKEN)
+            device = mock_awair_device(client=awair.client)
+            resp = await device.air_data_raw(from_date=(target - timedelta(minutes=30)))
 
     assert resp[0].timestamp == datetime(2020, 4, 10, 15, 38, 24, 111000)
     assert resp[0].score == 88.0
@@ -208,10 +214,11 @@ async def test_get_raw():
 async def test_sensor_creation_gen1():
     """Test that an Awair gen 1 creates expected sensors."""
     target = datetime(2020, 4, 10, 10, 38, 30)
-    with VCR.use_cassette("latest.yaml"), time_travel(target):
-        awair = Awair(ACCESS_TOKEN)
-        device = mock_awair_device(client=awair.client)
-        resp = await device.air_data_latest()
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("latest.yaml"), time_travel(target):
+            awair = Awair(session=session, access_token=ACCESS_TOKEN)
+            device = mock_awair_device(client=awair.client)
+            resp = await device.air_data_latest()
 
     assert hasattr(resp, "timestamp")
     assert hasattr(resp, "score")
@@ -234,10 +241,13 @@ async def test_sensor_creation_gen1():
 async def test_sensor_creation_omni():
     """Test that an Awair omni creates expected sensors."""
     target = datetime(2020, 4, 10, 10, 38, 30)
-    with VCR.use_cassette("omni.yaml"), time_travel(target):
-        awair = Awair(ACCESS_TOKEN)
-        device = mock_awair_device(client=awair.client, device=MOCK_OMNI_DEVICE_ATTRS)
-        resp = await device.air_data_latest()
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("omni.yaml"), time_travel(target):
+            awair = Awair(session=session, access_token=ACCESS_TOKEN)
+            device = mock_awair_device(
+                client=awair.client, device=MOCK_OMNI_DEVICE_ATTRS
+            )
+            resp = await device.air_data_latest()
 
     assert hasattr(resp, "timestamp")
     assert hasattr(resp, "score")
@@ -272,10 +282,13 @@ async def test_sensor_creation_omni():
 async def test_sensor_creation_mint():
     """Test that an Awair mint creates expected sensors."""
     target = datetime(2020, 4, 10, 10, 38, 30)
-    with VCR.use_cassette("mint.yaml"), time_travel(target):
-        awair = Awair(ACCESS_TOKEN)
-        device = mock_awair_device(client=awair.client, device=MOCK_MINT_DEVICE_ATTRS)
-        resp = await device.air_data_latest()
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("mint.yaml"), time_travel(target):
+            awair = Awair(session=session, access_token=ACCESS_TOKEN)
+            device = mock_awair_device(
+                client=awair.client, device=MOCK_MINT_DEVICE_ATTRS
+            )
+            resp = await device.air_data_latest()
 
     assert hasattr(resp, "timestamp")
     assert hasattr(resp, "score")
@@ -307,10 +320,13 @@ async def test_sensor_creation_mint():
 async def test_sensor_creation_gen2():
     """Test that an Awair gen2 creates expected sensors."""
     target = datetime(2020, 4, 10, 10, 38, 30)
-    with VCR.use_cassette("awair-r2.yaml"), time_travel(target):
-        awair = Awair(ACCESS_TOKEN)
-        device = mock_awair_device(client=awair.client, device=MOCK_GEN2_DEVICE_ATTRS)
-        resp = await device.air_data_latest()
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("awair-r2.yaml"), time_travel(target):
+            awair = Awair(session=session, access_token=ACCESS_TOKEN)
+            device = mock_awair_device(
+                client=awair.client, device=MOCK_GEN2_DEVICE_ATTRS
+            )
+            resp = await device.air_data_latest()
 
     assert hasattr(resp, "timestamp")
     assert hasattr(resp, "score")
@@ -343,10 +359,13 @@ async def test_sensor_creation_gen2():
 async def test_sensor_creation_glow():
     """Test that an Awair glow creates expected sensors."""
     target = datetime(2020, 4, 10, 10, 38, 30)
-    with VCR.use_cassette("glow.yaml"), time_travel(target):
-        awair = Awair(ACCESS_TOKEN)
-        device = mock_awair_device(client=awair.client, device=MOCK_GLOW_DEVICE_ATTRS)
-        resp = await device.air_data_latest()
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("glow.yaml"), time_travel(target):
+            awair = Awair(session=session, access_token=ACCESS_TOKEN)
+            device = mock_awair_device(
+                client=awair.client, device=MOCK_GLOW_DEVICE_ATTRS
+            )
+            resp = await device.air_data_latest()
 
     assert hasattr(resp, "timestamp")
     assert hasattr(resp, "score")
@@ -376,88 +395,97 @@ async def test_sensor_creation_glow():
 
 async def test_auth_failure():
     """Test that we can raise on bad auth."""
-    with VCR.use_cassette("bad_auth.yaml"):
-        awair = Awair("bad")
-        with pytest.raises(AwairClient.AuthError):
-            await awair.user()
+    async with aiohttp.ClientSession() as session:
+        with pytest.raises(AwairError):
+            Awair(session=session)
+
+        with VCR.use_cassette("bad_auth.yaml"):
+            awair = Awair(session=session, access_token="bad")
+            with pytest.raises(AuthError):
+                await awair.user()
 
 
 async def test_bad_query():
     """Test that we can raise on bad query."""
-    with VCR.use_cassette("bad_params.yaml"):
-        with patch(
-            "python_awair.devices.AwairDevice._format_args",
-            return_value="?fahrenheit=451",
-        ):
-            with pytest.raises(AwairClient.QueryError):
-                awair = Awair(ACCESS_TOKEN)
-                device = mock_awair_device(client=awair.client)
-                await device.air_data_latest()
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("bad_params.yaml"):
+            with patch(
+                "python_awair.devices.AwairDevice._format_args",
+                return_value="?fahrenheit=451",
+            ):
+                with pytest.raises(QueryError):
+                    awair = Awair(session=session, access_token=ACCESS_TOKEN)
+                    device = mock_awair_device(client=awair.client)
+                    await device.air_data_latest()
 
 
 async def test_not_found():
     """Test that we can raise on 404."""
-    with VCR.use_cassette("not_found.yaml"):
-        with patch("python_awair.const.DEVICE_URL", f"{const.USER_URL}/devicesxyz"):
-            with pytest.raises(AwairClient.NotFoundError):
-                awair = Awair(ACCESS_TOKEN)
-                user = mock_awair_user(client=awair.client)
-                await user.devices()
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("not_found.yaml"):
+            with patch("python_awair.const.DEVICE_URL", f"{const.USER_URL}/devicesxyz"):
+                with pytest.raises(NotFoundError):
+                    awair = Awair(session=session, access_token=ACCESS_TOKEN)
+                    user = mock_awair_user(client=awair.client)
+                    await user.devices()
 
 
 async def test_air_data_handles_boolean_attributes():
     """Test that we handle boolean query attributes."""
-    awair = Awair(ACCESS_TOKEN)
-    device = mock_awair_device(client=awair.client)
+    async with aiohttp.ClientSession() as session:
+        awair = Awair(session=session, access_token=ACCESS_TOKEN)
+        device = mock_awair_device(client=awair.client)
 
-    with pytest.raises(vol.Invalid):
-        await device.air_data_raw(desc=None)
+        with pytest.raises(vol.Invalid):
+            await device.air_data_raw(desc=None)
 
-    with pytest.raises(vol.Invalid):
-        await device.air_data_raw(fahrenheit=1)
+        with pytest.raises(vol.Invalid):
+            await device.air_data_raw(fahrenheit=1)
 
 
 async def test_air_data_handles_numeric_limits():
     """Test that we handle numeric query attributes."""
-    awair = Awair(ACCESS_TOKEN)
-    device = mock_awair_device(client=awair.client)
+    async with aiohttp.ClientSession() as session:
+        awair = Awair(session=session, access_token=ACCESS_TOKEN)
+        device = mock_awair_device(client=awair.client)
 
-    with pytest.raises(vol.Invalid):
-        await device.air_data_raw(limit=-1)
+        with pytest.raises(vol.Invalid):
+            await device.air_data_raw(limit=-1)
 
-    with pytest.raises(vol.Invalid):
-        await device.air_data_raw(limit=361)
+        with pytest.raises(vol.Invalid):
+            await device.air_data_raw(limit=361)
 
-    with pytest.raises(vol.Invalid):
-        await device.air_data_five_minute(limit=289)
+        with pytest.raises(vol.Invalid):
+            await device.air_data_five_minute(limit=289)
 
-    with pytest.raises(vol.Invalid):
-        await device.air_data_fifteen_minute(limit=673)
+        with pytest.raises(vol.Invalid):
+            await device.air_data_fifteen_minute(limit=673)
 
 
 async def test_air_data_handles_datetime_limits():
     """Test that we handle date limits."""
-    awair = Awair(ACCESS_TOKEN)
-    device = mock_awair_device(client=awair.client)
+    async with aiohttp.ClientSession() as session:
+        awair = Awair(session=session, access_token=ACCESS_TOKEN)
+        device = mock_awair_device(client=awair.client)
 
-    now = datetime.now()
+        now = datetime.now()
 
-    with pytest.raises(vol.Invalid):
-        await device.air_data_raw(from_date=(now + timedelta(hours=1)))
+        with pytest.raises(vol.Invalid):
+            await device.air_data_raw(from_date=(now + timedelta(hours=1)))
 
-    with pytest.raises(vol.Invalid):
-        await device.air_data_raw(from_date=False)
+        with pytest.raises(vol.Invalid):
+            await device.air_data_raw(from_date=False)
 
-    with pytest.raises(vol.Invalid):
-        await device.air_data_raw(from_date=(now - timedelta(hours=2)))
+        with pytest.raises(vol.Invalid):
+            await device.air_data_raw(from_date=(now - timedelta(hours=2)))
 
-    with pytest.raises(vol.Invalid):
-        await device.air_data_five_minute(from_date=(now - timedelta(hours=25)))
+        with pytest.raises(vol.Invalid):
+            await device.air_data_five_minute(from_date=(now - timedelta(hours=25)))
 
-    with pytest.raises(vol.Invalid):
-        await device.air_data_fifteen_minute(from_date=(now - timedelta(days=8)))
+        with pytest.raises(vol.Invalid):
+            await device.air_data_fifteen_minute(from_date=(now - timedelta(days=8)))
 
-    with pytest.raises(vol.Invalid):
-        await device.air_data_fifteen_minute(
-            from_date=(now - timedelta(hours=1)), to_date=(now - timedelta(hours=3))
-        )
+        with pytest.raises(vol.Invalid):
+            await device.air_data_fifteen_minute(
+                from_date=(now - timedelta(hours=1)), to_date=(now - timedelta(hours=3))
+            )

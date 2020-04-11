@@ -1,0 +1,32 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: GET
+    uri: https://developer-apis.awair.is/v1/users/self
+  response:
+    body:
+      string: '{"dobDay":8,"usages":[{"scope":"USER_INFO","usage":1}],"tier":"Large_developer","email":"foo@bar.com","dobYear":2020,"permissions":[{"scope":"USER_DEVICE_LIST","quota":2147483647},{"scope":"USER_INFO","quota":2147483647},{"scope":"FIFTEEN_MIN","quota":30000},{"scope":"FIVE_MIN","quota":30000},{"scope":"RAW","quota":30000},{"scope":"LATEST","quota":30000},{"scope":"PUT_PREFERENCE","quota":30000},{"scope":"PUT_DISPLAY_MODE","quota":30000},{"scope":"PUT_LED_MODE","quota":30000},{"scope":"PUT_KNOCKING_MODE","quota":30000},{"scope":"PUT_TIMEZONE","quota":30000},{"scope":"PUT_DEVICE_NAME","quota":30000},{"scope":"PUT_LOCATION","quota":30000},{"scope":"PUT_ROOM_TYPE","quota":30000},{"scope":"PUT_SPACE_TYPE","quota":30000},{"scope":"GET_DISPLAY_MODE","quota":30000},{"scope":"GET_LED_MODE","quota":30000},{"scope":"GET_KNOCKING_MODE","quota":30000},{"scope":"GET_POWER_STATUS","quota":30000},{"scope":"GET_TIMEZONE","quota":30000}],"dobMonth":4,"sex":"MALE","lastName":"Hayworth","firstName":"Andrew","id":"32406"}'
+    headers:
+      Alt-Svc: clear
+      Via: 1.1 google
+      access-control-allow-credentials: 'true'
+      access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept,
+        Authorization, Accept-Encoding, Accept-Language, Host, Referer, User-Agent
+      access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+      access-control-allow-origin: '*'
+      content-type: application/json
+      date: Sat, 11 Apr 2020 21:12:01 GMT
+      server: istio-envoy
+      transfer-encoding: chunked
+      x-envoy-decorator-operation: developer-apis-node-port.default.svc.cluster.local:3000/*
+      x-envoy-upstream-service-time: '103'
+    status:
+      code: 200
+      message: OK
+    url: https://developer-apis.awair.is/v1/users/self
+version: 1

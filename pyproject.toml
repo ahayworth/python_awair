@@ -20,11 +20,10 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.6"
 aiohttp = "~3.6.1"
+voluptuous = "^0.11.7"
 
 # TODO: make some of these dependencies optional
-voluptuous = "^0.11.7"
 [tool.poetry.dev-dependencies]
-aioresponses = "^0.6.3"
 black = "^19.10b0"
 flake8 = "^3.7.9"
 ipython = "^7.13.0"
