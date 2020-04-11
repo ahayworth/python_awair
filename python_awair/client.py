@@ -1,6 +1,6 @@
 """Wrapper class to query the Awair API."""
 
-from typing import NoReturn
+from typing import Any, Dict, NoReturn
 
 from aiohttp import ClientResponse, ClientSession
 
@@ -22,7 +22,7 @@ class AwairClient:
         self.__authenticator = authenticator
         self.__session = session
 
-    async def query(self, url: str) -> dict:
+    async def query(self, url: str) -> Any:
         """Query the Awair api, and handle errors."""
         headers = await self.__headers()
         async with self.__session.get(url, headers=headers) as resp:
@@ -34,7 +34,7 @@ class AwairClient:
 
             return json
 
-    async def __headers(self) -> dict:
+    async def __headers(self) -> Dict[str, str]:
         """Return headers to set on the API request."""
         token = await self.__authenticator.get_bearer_token()
         return {
@@ -43,7 +43,7 @@ class AwairClient:
         }
 
     @staticmethod
-    def __check_errors_array(json: dict) -> None:
+    def __check_errors_array(json: Dict[Any, Any]) -> None:
         """Check for an "errors" array and process it.
 
         Holdover from the GraphQL API, unclear if we could still get messages like this.

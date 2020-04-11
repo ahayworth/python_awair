@@ -40,9 +40,11 @@ loop.close()
 
 - We manage dependencies and builds via [poetry](https://python-poetry.org)
 - We use [pytest](https://github.com/pytest-dev/pytest) and [tox](https://github.com/tox-dev/tox) to test
-- Code style is enforced via flake8
+- Code style is enforced via
 
 After installing and configuring poetry:
 - Run `poetry install` to install all dependencies
+  - Run `poetry install -E linters` to install recommended linters
 - Run `poetry shell` to drop into a virtualenv
-- Run `poetry run tox` (or just `tox` if you're in the virtualenv) to test
+- Run `poetry run tox` (or just `tox` if you're in a virtualenv) to test
+  - Run `poetry run tox -e lint` (or just `tox -e lint` if you're in a virtualenv) to run linters.

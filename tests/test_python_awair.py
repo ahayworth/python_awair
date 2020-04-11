@@ -1,6 +1,7 @@
 """Test basic python_awair functionality."""
 
 from datetime import date, datetime, timedelta
+from typing import Any
 from unittest.mock import patch
 
 import aiohttp
@@ -20,7 +21,7 @@ from tests.const import (
 from tests.utils import VCR, SillyAuth, mock_awair_device, mock_awair_user, time_travel
 
 
-async def test_get_user():
+async def test_get_user() -> Any:
     """Test that we can get a user response."""
     async with aiohttp.ClientSession() as session:
         with VCR.use_cassette("user.yaml"):
@@ -36,7 +37,7 @@ async def test_get_user():
     assert user.usages["USER_INFO"] == 80
 
 
-async def test_custom_auth():
+async def test_custom_auth() -> Any:
     """Test that we can use the API with a custom auth class."""
     async with aiohttp.ClientSession() as session:
         with VCR.use_cassette("custom_auth.yaml"):
@@ -47,7 +48,7 @@ async def test_custom_auth():
     assert user.user_id == "32406"
 
 
-async def test_get_devices():
+async def test_get_devices() -> Any:
     """Test that we can get a list of devices."""
     async with aiohttp.ClientSession() as session:
         with VCR.use_cassette("devices.yaml"):
@@ -60,7 +61,7 @@ async def test_get_devices():
     assert devices[0].uuid == f"awair_{AWAIR_GEN1_ID}"
 
 
-async def test_get_latest():
+async def test_get_latest() -> Any:
     """Test that we can get the latest air data."""
     target = datetime(2020, 4, 10, 10, 38, 30)
     async with aiohttp.ClientSession() as session:
@@ -69,13 +70,14 @@ async def test_get_latest():
             device = mock_awair_device(client=awair.client)
             resp = await device.air_data_latest()
 
+    assert resp is not None
     assert resp.timestamp == datetime(2020, 4, 10, 15, 38, 24, 111000)
     assert resp.score == 88.0
     assert resp.sensors["temperature"] == 21.770000457763672
     assert resp.indices["temperature"] == -1.0
 
 
-async def test_get_five_minute():
+async def test_get_five_minute() -> Any:
     """Test that we can get the five-minute avg air data."""
     target = datetime(2020, 4, 10, 10, 38, 31, 2883)
     async with aiohttp.ClientSession() as session:
@@ -92,7 +94,7 @@ async def test_get_five_minute():
     assert resp[0].indices["temperature"] == -1.0
 
 
-async def test_get_fifteen_minute():
+async def test_get_fifteen_minute() -> Any:
     """Test that we can get the fifteen-minute avg air data."""
     target = datetime(2020, 4, 10, 10, 38, 31, 252873)
     async with aiohttp.ClientSession() as session:
@@ -109,7 +111,7 @@ async def test_get_fifteen_minute():
     assert resp[0].indices["temperature"] == -1.0
 
 
-async def test_get_raw():
+async def test_get_raw() -> Any:
     """Test that we can get the raw air data."""
     target = datetime(2020, 4, 10, 10, 38, 31, 720296)
     async with aiohttp.ClientSession() as session:
@@ -124,7 +126,7 @@ async def test_get_raw():
     assert resp[0].indices["temperature"] == -1.0
 
 
-async def test_sensor_creation_gen1():
+async def test_sensor_creation_gen1() -> Any:
     """Test that an Awair gen 1 creates expected sensors."""
     target = datetime(2020, 4, 10, 10, 38, 30)
     async with aiohttp.ClientSession() as session:
@@ -144,6 +146,7 @@ async def test_sensor_creation_gen1():
         "volatile_organic_compounds",
         "dust",
     ]
+    assert resp is not None
     assert len(resp.sensors) == len(expected_sensors)
     assert len(resp.indices) == len(expected_sensors)
     for sensor in expected_sensors:
@@ -151,7 +154,7 @@ async def test_sensor_creation_gen1():
         assert hasattr(resp.indices, sensor)
 
 
-async def test_sensor_creation_omni():
+async def test_sensor_creation_omni() -> Any:
     """Test that an Awair omni creates expected sensors."""
     target = datetime(2020, 4, 10, 10, 38, 30)
     async with aiohttp.ClientSession() as session:
@@ -176,6 +179,7 @@ async def test_sensor_creation_omni():
         "illuminance",
         "sound_pressure_level",
     ]
+    assert resp is not None
     assert len(resp.sensors) == len(expected_sensors)
     for sensor in expected_sensors:
         assert hasattr(resp.sensors, sensor)
@@ -192,7 +196,7 @@ async def test_sensor_creation_omni():
         assert hasattr(resp.indices, sensor)
 
 
-async def test_sensor_creation_mint():
+async def test_sensor_creation_mint() -> Any:
     """Test that an Awair mint creates expected sensors."""
     target = datetime(2020, 4, 10, 10, 38, 30)
     async with aiohttp.ClientSession() as session:
@@ -215,6 +219,7 @@ async def test_sensor_creation_mint():
         "particulate_matter_2_5",
         "illuminance",
     ]
+    assert resp is not None
     assert len(resp.sensors) == len(expected_sensors)
     for sensor in expected_sensors:
         assert hasattr(resp.sensors, sensor)
@@ -230,7 +235,7 @@ async def test_sensor_creation_mint():
         assert hasattr(resp.indices, sensor)
 
 
-async def test_sensor_creation_gen2():
+async def test_sensor_creation_gen2() -> Any:
     """Test that an Awair gen2 creates expected sensors."""
     target = datetime(2020, 4, 10, 10, 38, 30)
     async with aiohttp.ClientSession() as session:
@@ -253,6 +258,7 @@ async def test_sensor_creation_gen2():
         "particulate_matter_2_5",
         "carbon_dioxide",
     ]
+    assert resp is not None
     assert len(resp.sensors) == len(expected_sensors)
     for sensor in expected_sensors:
         assert hasattr(resp.sensors, sensor)
@@ -269,7 +275,7 @@ async def test_sensor_creation_gen2():
         assert hasattr(resp.indices, sensor)
 
 
-async def test_sensor_creation_glow():
+async def test_sensor_creation_glow() -> Any:
     """Test that an Awair glow creates expected sensors."""
     target = datetime(2020, 4, 10, 10, 38, 30)
     async with aiohttp.ClientSession() as session:
@@ -291,6 +297,7 @@ async def test_sensor_creation_glow():
         "volatile_organic_compounds",
         "carbon_dioxide",
     ]
+    assert resp is not None
     assert len(resp.sensors) == len(expected_sensors)
     for sensor in expected_sensors:
         assert hasattr(resp.sensors, sensor)
@@ -306,7 +313,7 @@ async def test_sensor_creation_glow():
         assert hasattr(resp.indices, sensor)
 
 
-async def test_auth_failure():
+async def test_auth_failure() -> Any:
     """Test that we can raise on bad auth."""
     async with aiohttp.ClientSession() as session:
         with pytest.raises(AwairError):
@@ -318,7 +325,7 @@ async def test_auth_failure():
                 await awair.user()
 
 
-async def test_bad_query():
+async def test_bad_query() -> Any:
     """Test that we can raise on bad query."""
     async with aiohttp.ClientSession() as session:
         with VCR.use_cassette("bad_params.yaml"):
@@ -332,7 +339,7 @@ async def test_bad_query():
                     await device.air_data_latest()
 
 
-async def test_not_found():
+async def test_not_found() -> Any:
     """Test that we can raise on 404."""
     async with aiohttp.ClientSession() as session:
         with VCR.use_cassette("not_found.yaml"):
@@ -343,7 +350,7 @@ async def test_not_found():
                     await user.devices()
 
 
-async def test_air_data_handles_boolean_attributes():
+async def test_air_data_handles_boolean_attributes() -> Any:
     """Test that we handle boolean query attributes."""
     async with aiohttp.ClientSession() as session:
         awair = Awair(session=session, access_token=ACCESS_TOKEN)
@@ -356,7 +363,7 @@ async def test_air_data_handles_boolean_attributes():
             await device.air_data_raw(fahrenheit=1)
 
 
-async def test_air_data_handles_numeric_limits():
+async def test_air_data_handles_numeric_limits() -> Any:
     """Test that we handle numeric query attributes."""
     async with aiohttp.ClientSession() as session:
         awair = Awair(session=session, access_token=ACCESS_TOKEN)
@@ -375,7 +382,7 @@ async def test_air_data_handles_numeric_limits():
             await device.air_data_fifteen_minute(limit=673)
 
 
-async def test_air_data_handles_datetime_limits():
+async def test_air_data_handles_datetime_limits() -> Any:
     """Test that we handle date limits."""
     async with aiohttp.ClientSession() as session:
         awair = Awair(session=session, access_token=ACCESS_TOKEN)

@@ -2,7 +2,7 @@
 
 import urllib
 from datetime import datetime, timedelta
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import voluptuous as vol
 
@@ -33,7 +33,7 @@ class AwairDevice:
 
     client: AwairClient
 
-    def __init__(self, client: AwairClient, attributes: dict) -> None:
+    def __init__(self, client: AwairClient, attributes: Dict[str, Any]) -> None:
         """Initialize an awair device from API attributes."""
         self.device_id = attributes["deviceId"]
         self.uuid = attributes["deviceUUID"]
@@ -79,7 +79,7 @@ class AwairDevice:
         """Return the raw air data for this device."""
         return await self.__get_airdata("raw", **kwargs)
 
-    async def __get_airdata(self, kind: str, **kwargs) -> List[AirData]:
+    async def __get_airdata(self, kind: str, **kwargs: AirDataParam) -> List[AirData]:
         """Call one of several varying air-data API endpoints."""
         url = "/".join(
             [const.DEVICE_URL, self.device_type, str(self.device_id), "air-data", kind]
@@ -96,7 +96,7 @@ class AwairDevice:
         max_limit = {"raw": 360, "5-min-avg": 288, "15-min-avg": 672}
         max_hours = {"raw": 1, "15-min-avg": 168, "5-min-avg": 24}
 
-        def validate_hours(params: dict) -> dict:
+        def validate_hours(params: Dict[str, Any]) -> Dict[str, Any]:
             hour_limit = max_hours.get(kind, 24)
             right_now = datetime.now()
             from_date = params.get("from_date", right_now - timedelta(hours=hour_limit))

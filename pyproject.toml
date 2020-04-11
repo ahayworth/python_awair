@@ -22,21 +22,26 @@ python = "^3.6"
 aiohttp = "~3.6.1"
 voluptuous = "^0.11.7"
 
-# TODO: make some of these dependencies optional
 [tool.poetry.dev-dependencies]
-black = "^19.10b0"
-flake8 = "^3.7.9"
-ipython = "^7.13.0"
-isort = "^4.3.21"
-mypy = "^0.770"
-pydocstyle = "^5.0.2"
-pylint = "^2.4.4"
-pyls-mypy = { git = "https://github.com/tomv564/pyls-mypy" }
 pytest = "^5.2"
 pytest-aiohttp = "^0.3.0"
-python-language-server = "^0.31.9"
 tox = "^3.14.6"
 vcrpy = "^4.0.2"
+
+# These linters are optional for development, although
+# CI jobs *do* enforce some of them.
+black = { version = "^19.10b0", optional = true }
+flake8 = { version = "^3.7.9", optional = true }
+flake8-docstrings = { version = "^1.5.0", optional = true }
+isort = { version = "^4.3.21", optional = true }
+mypy = { version = "^0.770", optional = true }
+pydocstyle = { version = "^5.0.2", optional = true }
+pylint = { version = "^2.4.4", optional = true }
+pyls-mypy = { git = "https://github.com/tomv564/pyls-mypy", optional = true }
+python-language-server = { version = "^0.31.9", optional = true }
+
+[tool.poetry.extras]
+linters = ["black", "flake8", "flake8-docstrings", "isort", "mypyp", "pydocstyle", "pylint", "pyls-mypy", "python-language-server"]
 
 [tool.poetry.urls]
 "Say Thanks" = "https://saythanks.io/to/ahayworth@gmail.com"
@@ -58,6 +63,9 @@ whitelist_externals = poetry
 commands =
   poetry run black . --check
   poetry run isort -c
+  poetry run flake8
+  poetry run pylint python_awair/ tests/
+  poetry run mypy python_awair/ tests/
 """
 
 [build-system]

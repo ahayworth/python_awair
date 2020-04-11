@@ -1,6 +1,7 @@
 """Wrapper class for awair airdata responses."""
 
 from datetime import datetime
+from typing import Any, Dict
 
 from python_awair import const
 from python_awair.indices import Indices
@@ -15,7 +16,7 @@ class AirData:
     sensors: Sensors
     indices: Indices
 
-    def __init__(self, attributes: dict) -> None:
+    def __init__(self, attributes: Dict[str, Any]) -> None:
         """Initialize from API data."""
         self.timestamp = datetime.strptime(attributes["timestamp"], const.DATE_FORMAT)
         self.score = attributes["score"]

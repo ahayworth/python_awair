@@ -4,7 +4,7 @@ import re
 from collections import namedtuple
 from contextlib import contextmanager
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, Generator, Optional
 from unittest.mock import patch
 
 import vcr
@@ -22,7 +22,7 @@ def mock_awair_user(client: AwairClient) -> AwairUser:
 
 
 def mock_awair_device(
-    client: AwairClient, device: Optional[dict] = None,
+    client: AwairClient, device: Optional[Dict[str, Any]] = None,
 ) -> AwairDevice:
     """Return a mock awair device."""
     if not device:
@@ -54,7 +54,7 @@ SCRUBBERS = [
 ]
 
 
-def scrub(response):
+def scrub(response: Any) -> Any:
     """Scrub sensitive data."""
     body = response["body"]["string"].decode("utf-8")
     for scrubber in SCRUBBERS:
@@ -74,7 +74,7 @@ VCR = vcr.VCR(
 
 
 @contextmanager
-def time_travel(target: datetime):
+def time_travel(target: datetime) -> Generator[Any, Any, Any]:
     """Manage time in our tests."""
     with patch("python_awair.devices.datetime") as mock_date:
         mock_date.now.return_value = target

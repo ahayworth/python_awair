@@ -1,12 +1,14 @@
 """Dict with attribute-like access."""
 
+from typing import Any, Dict, KeysView
+
 from python_awair import const
 
 
-class AttrDict(dict):
+class AttrDict(Dict[str, Any]):
     """Dict with attribute-like access."""
 
-    def __init__(self, attrs: dict) -> None:
+    def __init__(self, attrs: Dict[str, Any]) -> None:
         """Initialize, hiding known sensor aliases."""
         new_attrs = dict(attrs)
         for key, value in attrs.items():
@@ -16,21 +18,21 @@ class AttrDict(dict):
 
         super().__init__(new_attrs)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         """Return things in the dict via dot-notation."""
         if name in self:
             return self[name]
 
         raise AttributeError()
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: Any) -> None:
         """Set values in the dict via dot-notation."""
         self[name] = value
 
-    def __delattr__(self, name):
+    def __delattr__(self, name: str) -> None:
         """Remove values from the dict via dot-notation."""
         del self[name]
 
-    def __dir__(self):
+    def __dir__(self) -> KeysView[str]:
         """Return dict keys as dir attributes."""
         return self.keys()

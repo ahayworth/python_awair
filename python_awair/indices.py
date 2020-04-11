@@ -5,6 +5,6 @@ from python_awair.attrdict import AttrDict
 class Indices(AttrDict):
     """Indices dict with attribute access."""
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Pretty-print."""
         return f"Indices({super().__repr__()})"

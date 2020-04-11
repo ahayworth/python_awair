@@ -2,7 +2,7 @@
 
 
 from datetime import date
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from python_awair import const
 from python_awair.client import AwairClient
@@ -24,7 +24,7 @@ class AwairUser:
 
     client: AwairClient
 
-    def __init__(self, client: AwairClient, attributes: dict) -> None:
+    def __init__(self, client: AwairClient, attributes: Dict[str, Any]) -> None:
         """Initialize an awair user from API attributes."""
         self.user_id = attributes["id"]
         self.email = attributes.get("email", None)
