@@ -32,7 +32,8 @@ html_static_path = ["_static"]
 
 intersphinx_mapping = {"aiohttp": ("https://aiohttp.readthedocs.io/en/stable/", None)}
 
-master_doc = 'index'
+master_doc = "index"
+
 
 def linkcode_resolve(domain, info):  # type: ignore
     """Return github.com link for module."""
