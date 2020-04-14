@@ -1,0 +1,25 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: GET
+    uri: https://developer-apis.awair.is/v1/users/self/devicesxyz
+  response:
+    body:
+      string: The requested resource could not be found.
+    headers:
+      Alt-Svc: clear
+      Content-Length: '42'
+      Content-Type: text/plain; charset=UTF-8
+      Date: Thu, 09 Apr 2020 23:18:44 GMT
+      Server: akka-http/10.1.1
+      Via: 1.1 google
+    status:
+      code: 404
+      message: Not Found
+    url: https://developer-apis.awair.is/v1/users/self/devicesxyz
+version: 1

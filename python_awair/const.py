@@ -1,100 +1,25 @@
 """Mostly query constants."""
-AWAIR_URL = "https://developer-apis.awair.is/graphql"
-USER_QUERY = """
-User {
-    id
-    email
-    name {
-        firstName
-        lastName
-    }
-    dob {
-        year
-        month
-        day
-    }
-    sex
-    tier
-    permissions {
-        scope
-        quota
-    }
-    usage {
-        scope
-        counts
-    }
-}"""
+BASE_URL = "https://developer-apis.awair.is/v1"
+USER_URL = f"{BASE_URL}/users/self"
+DEVICE_URL = f"{USER_URL}/devices"
+DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
-DEVICE_QUERY = """
-Devices {
-    devices {
-        uuid
-        deviceType
-        deviceId
-        name
-        preference
-        macAddress
-        room {
-            id
-            name
-            kind
-            Space {
-                id
-                kind
-                location {
-                    name
-                    timezone
-                    latitude
-                    longitude
-                }
-            }
-        }
-    }
-}"""
-
-AIR_DATA_SEQ = """
-airDataSeq {
-    timestamp
-    score
-    sensors {
-        component
-        value
-    }
-    indices {
-        component
-        value
-    }
+SENSOR_TO_ALIAS = {
+    "temp": "temperature",
+    "humid": "humidity",
+    "co2": "carbon_dioxide",
+    "voc": "volatile_organic_compounds",
+    "pm25": "particulate_matter_2_5",
+    "lux": "illuminance",
+    "spl_a": "sound_pressure_level",
 }
-"""
 
-LATEST_QUERY = """
-AirDataLatest(%s) {
-    %s
-}""" % (
-    "%s",
-    AIR_DATA_SEQ,
-)
-
-FIVE_MIN_QUERY = """
-AirData5Minute(%s) {
-    %s
-}""" % (
-    "%s",
-    AIR_DATA_SEQ,
-)
-
-FIFTEEN_MIN_QUERY = """
-AirData15Minute(%s) {
-    %s
-}""" % (
-    "%s",
-    AIR_DATA_SEQ,
-)
-
-RAW_QUERY = """
-AirDataRaw(%s) {
-    %s
-}""" % (
-    "%s",
-    AIR_DATA_SEQ,
-)
+AWAIR_MODELS = {
+    "awair": "Awair",
+    "awair-element": "Awair Element",
+    "awair-glow": "Awair Glow",
+    "awair-glow-c": "Awair Glow C",
+    "awair-mint": "Awair Mint",
+    "awair-omni": "Awair Omni",
+    "awair-r2": "Awair 2nd Edition",
+}

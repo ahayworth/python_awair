@@ -1,178 +1,71 @@
-"""Python asyncio client for the Awair GraphQL API."""
+"""Python asyncio client for the Awair REST API.
 
-import aiohttp
+This module is an object-oriented wrapper around the Awair_
+REST API_. It requires an access token (which can be obtained
+from the `developer console`_) and implements read-only access
+to the "user" portions of the API.
+
+.. _Awair: https://getawair.com
+.. _API: https://docs.developer.getawair.com/?version=latest
+.. _`developer console`: https://developer.getawair.com
+"""
+
+from typing import Optional
+
+from aiohttp import ClientSession
 
 from python_awair import const
+from python_awair.auth import AccessTokenAuth, AwairAuth
+from python_awair.client import AwairClient
+from python_awair.exceptions import AwairError
+from python_awair.user import AwairUser
 
 
-class AwairClient:
-    """Python asyncio client for the Awair GraphQL API."""
+class Awair:
+    """Entry class for the Awair API.
+
+    Args:
+        session: An aiohttp session that will be used to query
+            the Awair API.
+        access_token: An optional access token, obtained from
+            the Awair developer console, used to authenticate
+            to the Awair API.
+        authenticator: An optional instance of an AwairAuth class,
+            which can provide an HTTP Bearer token for
+            authentication. Most users will simply provide an
+            access_token, instead.
+    """
+
+    client: AwairClient
+    """AwairClient: The instantiated AwairClient
+        that will be used to fetch API responses and
+        check for HTTP errors.
+    """
 
     def __init__(
-        self, access_token, session=None, timeout=aiohttp.client.DEFAULT_TIMEOUT
-    ):
-        """Initialize an AwairClient with sensible defaults."""
-        self._headers = {
-            "Authorization": "Bearer %s" % access_token,
-            "Content-Type": "application/json",
-        }
-
-        self._timeout = timeout
-        self._session = session
-
-    async def user(self):
-        """Yield user data."""
-        response = await self._query(const.USER_QUERY)
-        return response["User"]
-
-    async def devices(self):
-        """List devices and locations."""
-        response = await self._query(const.DEVICE_QUERY)
-        return response["Devices"]["devices"]
-
-    async def air_data_latest(self, uuid, fahrenheit=False):
-        """Return the latest air quality measurements."""
-        variables = {
-            "deviceUUID": self._quote(uuid),
-            "fahrenheit": self._quote(fahrenheit),
-        }
-
-        response = await self._query(
-            const.LATEST_QUERY % self._query_variables(variables), variables
-        )
-        return response["AirDataLatest"]["airDataSeq"]
-
-    async def air_data_five_minute(self, uuid, **kwargs):
-        """Return the 5min summary air quality measurements."""
-        # args from_date, to_date, limit, desc, fahrenheit)
-        variables = {
-            "deviceUUID": self._quote(uuid),
-        }
-
-        for key, value in kwargs.items():
-            variables[key] = self._quote(value)
-
-        response = await self._query(
-            const.FIVE_MIN_QUERY % self._query_variables(variables), variables
-        )
-        return response["AirData5Minute"]["airDataSeq"]
-
-    async def air_data_fifteen_minute(self, uuid, **kwargs):
-        """Return the 15min summary air quality measurements."""
-        # args from_date, to_date, limit, desc, fahrenheit)
-        variables = {
-            "deviceUUID": self._quote(uuid),
-        }
-
-        for key, value in kwargs.items():
-            variables[key] = self._quote(value)
-
-        response = await self._query(
-            const.FIFTEEN_MIN_QUERY % self._query_variables(variables), variables
-        )
-        return response["AirData15Minute"]["airDataSeq"]
-
-    async def air_data_raw(self, uuid, **kwargs):
-        """Return raw air quality measurements."""
-        # args from_date, to_date, limit, desc, fahrenheit)
-        variables = {
-            "deviceUUID": self._quote(uuid),
-        }
-
-        for key, value in kwargs.items():
-            variables[key] = self._quote(value)
-
-        response = await self._query(
-            const.RAW_QUERY % self._query_variables(variables), variables
-        )
-        return response["AirDataRaw"]["airDataSeq"]
-
-    async def _query(self, query, variables=None):
-        data = {"query": "query { %s }" % query, "variables": variables}
-
-        if self._session is None:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    const.AWAIR_URL,
-                    json=data,
-                    headers=self._headers,
-                    timeout=self._timeout,
-                ) as resp:
-                    if resp.status == 200:
-                        json = await resp.json()
+        self,
+        session: ClientSession,
+        access_token: Optional[str] = None,
+        authenticator: Optional[AwairAuth] = None,
+    ) -> None:
+        """Initialize the Awair API wrapper."""
+        if authenticator:
+            self.client = AwairClient(authenticator, session)
+        elif access_token:
+            self.client = AwairClient(AccessTokenAuth(access_token), session)
         else:
-            async with self._session.post(
-                const.AWAIR_URL, json=data, headers=self._headers, timeout=self._timeout
-            ) as resp:
-                if resp.status == 200:
-                    json = await resp.json()
+            raise AwairError("No authentication supplied!")
 
-        if resp.status == 200:
-            data = json["data"]
+    async def user(self) -> AwairUser:
+        """Return the current AwairUser.
 
-            if "errors" in json:
-                errors = json["errors"]
-
-                ratelimit = False
-                for error in errors:
-                    if "Too many requests" in error["message"]:
-                        ratelimit = True
-                        break
-
-                if ratelimit:
-                    raise AwairClient.RatelimitError(
-                        "The ratelimit for the Awair API has been exceeded. "
-                        + "Please try again later."
-                    )
-
-            return data
-
-        if resp.status == 400:
-            raise AwairClient.QueryError(
-                "The query %s with variables %s is invalid." % (query, variables)
-            )
-
-        if resp.status == 401:
-            raise AwairClient.AuthError(
-                "The supplied access token is invalid or "
-                + "does not have access to the requested data."
-            )
-
-        if resp.status == 404:
-            raise AwairClient.NotFoundError(
-                "The Awair API returned an unexpected HTTP 404."
-            )
-
-        raise AwairClient.GenericError("Unable to query the Awair API.")
-
-    @staticmethod
-    def _quote(arg):
-        if isinstance(arg, bool):
-            if arg:
-                return "true"
-
-            return "false"
-
-        if isinstance(arg, str):
-            return '"%s"' % arg
-
-        return arg
-
-    @staticmethod
-    def _query_variables(variables):
-        return ",".join(["%s: %s" % (k, v) for (k, v) in variables.items()])
-
-    class GenericError(Exception):
-        """Generic error."""
-
-    class AuthError(Exception):
-        """Some kind of authorization or authentication failure."""
-
-    class QueryError(Exception):
-        """The query was somehow malformed."""
-
-    class NotFoundError(Exception):
-        """The requested endpoint is gone."""
-
-    class RatelimitError(Exception):
-        """The API quota was exceeded."""
+        The Awair "user" API does not provide a way to query for
+        a specific user, so this method always returns the user
+        that is associated with the authentication that is in-use.
+        This is *typically* the user that owns the access_token
+        that was provided at class instantiaton, unless you have
+        provided an authenticator class implementing some other
+        stategy (perhaps OAuth).
+        """
+        response = await self.client.query(const.USER_URL)
+        return AwairUser(client=self.client, attributes=response)

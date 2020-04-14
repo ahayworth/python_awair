@@ -1,0 +1,32 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: GET
+    uri: https://developer-apis.awair.is/v1/users/self/devices/awair-mint/3665/air-data/latest?fahrenheit=false
+  response:
+    body:
+      string: '{"data":[{"timestamp":"2020-04-10T16:25:03.606Z","score":98.0,"sensors":[{"comp":"temp","value":20.639999389648438},{"comp":"humid","value":45.04999923706055},{"comp":"voc","value":269.0},{"comp":"pm25","value":1.0},{"comp":"lux","value":441.70001220703125}],"indices":[{"comp":"temp","value":0.0},{"comp":"humid","value":0.0},{"comp":"voc","value":0.0},{"comp":"pm25","value":0.0}]}]}'
+    headers:
+      Alt-Svc: clear
+      Via: 1.1 google
+      access-control-allow-credentials: 'true'
+      access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept,
+        Authorization, Accept-Encoding, Accept-Language, Host, Referer, User-Agent
+      access-control-allow-methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+      access-control-allow-origin: '*'
+      content-type: application/json
+      date: Fri, 10 Apr 2020 16:18:11 GMT
+      server: istio-envoy
+      transfer-encoding: chunked
+      x-envoy-decorator-operation: developer-apis-node-port.default.svc.cluster.local:3000/*
+      x-envoy-upstream-service-time: '46'
+    status:
+      code: 200
+      message: OK
+    url: https://developer-apis.awair.is/v1/users/self/devices/awair-mint/3665/air-data/latest?fahrenheit=false
+version: 1
