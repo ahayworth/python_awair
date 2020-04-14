@@ -967,7 +967,7 @@ docs = []
 linters = []
 
 [metadata]
-content-hash = "ade966bbc68ac5746e1db6ecb35beb9095b414fdce27f7b393d9894283340112"
+content-hash = "57ce46f70e8871ddeb2ce73042f3333c8ac56f88f47f7ec96e94444ea48254b5"
 python-versions = "^3.6"
 
 [metadata.files]
