@@ -30,7 +30,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-v2-poetry-${{ matrix.python-version }}
       - name: Install dependencies
-        run: poetry install -E linters
+        run: poetry install
       - name: Tests
         run: |
           poetry run tox -e ${{ matrix.toxenv }}
