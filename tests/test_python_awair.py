@@ -9,6 +9,7 @@ import pytest
 import voluptuous as vol
 
 from python_awair import Awair, const
+from python_awair.attrdict import AttrDict
 from python_awair.exceptions import AuthError, AwairError, NotFoundError, QueryError
 from tests.const import (
     ACCESS_TOKEN,
@@ -36,6 +37,8 @@ async def test_get_user() -> Any:
     assert user.permissions["FIFTEEN_MIN"] == 30000
     assert user.usages["USER_INFO"] == 80
 
+    assert "<AwairUser" in str(user)
+
 
 async def test_custom_auth() -> Any:
     """Test that we can use the API with a custom auth class."""
@@ -59,6 +62,7 @@ async def test_get_devices() -> Any:
     assert devices[0].device_id == AWAIR_GEN1_ID
     assert devices[0].device_type == "awair"
     assert devices[0].uuid == f"awair_{AWAIR_GEN1_ID}"
+    assert "<AwairDevice" in str(devices[0])
 
 
 async def test_get_latest() -> Any:
@@ -75,6 +79,7 @@ async def test_get_latest() -> Any:
     assert resp.score == 88.0
     assert resp.sensors["temperature"] == 21.770000457763672
     assert resp.indices["temperature"] == -1.0
+    assert "<AirData@2020-04-10" in str(resp)
 
 
 async def test_get_five_minute() -> Any:
@@ -152,6 +157,8 @@ async def test_sensor_creation_gen1() -> Any:
     for sensor in expected_sensors:
         assert hasattr(resp.sensors, sensor)
         assert hasattr(resp.indices, sensor)
+
+    assert device.model == "Awair"
 
 
 async def test_sensor_creation_omni() -> Any:
@@ -312,6 +319,9 @@ async def test_sensor_creation_glow() -> Any:
     for sensor in expected_indices:
         assert hasattr(resp.indices, sensor)
 
+    assert "Indices(" in str(resp.indices)
+    assert "Sensors(" in str(resp.sensors)
+
 
 async def test_auth_failure() -> Any:
     """Test that we can raise on bad auth."""
@@ -409,3 +419,27 @@ async def test_air_data_handles_datetime_limits() -> Any:
             await device.air_data_fifteen_minute(
                 from_date=(now - timedelta(hours=1)), to_date=(now - timedelta(hours=3))
             )
+
+
+def test_attrdict() -> Any:
+    """Test a few AttrDict properties."""
+    comp = AttrDict({"foo": "bar", "humid": 123})
+
+    with pytest.raises(AttributeError):
+        print(comp.nope)
+
+    with pytest.raises(AttributeError):
+        print(comp.humid)
+
+    assert comp.humidity == 123
+
+    comp["nope"] = "hi"
+    assert comp.nope == "hi"
+
+    del comp["nope"]
+    del comp.humidity
+
+    assert "foo" in dir(comp)
+    assert "nope" not in dir(comp)
+    assert "humid" not in dir(comp)
+    assert "humidity" not in dir(comp)
