@@ -16,10 +16,10 @@ SENSOR_TO_ALIAS = {
 
 AWAIR_MODELS = {
     "awair": "Awair",
+    "awair-element": "Awair Element",
     "awair-glow": "Awair Glow",
+    "awair-glow-c": "Awair Glow C",
     "awair-mint": "Awair Mint",
     "awair-omni": "Awair Omni",
     "awair-r2": "Awair 2nd Edition",
-    "awair-glow-c": "Awair Glow C",
-    "awair-element": "Awair Element",
 }

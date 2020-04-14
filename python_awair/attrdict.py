@@ -6,7 +6,15 @@ from python_awair import const
 
 
 class AttrDict(Dict[str, Any]):
-    """Dict with attribute-like access."""
+    """Dict with attribute-like access.
+
+    For example, given an AttrDict *foo*, we could
+    access its values via *foo["bar"]* or *foo.bar*.
+
+    This is the parent class for the Sensors and Indices
+    classes, and as such it renames some properties to
+    friendlier names on initialization (but not anytime after).
+    """
 
     def __init__(self, attrs: Dict[str, Any]) -> None:
         """Initialize, hiding known sensor aliases."""
