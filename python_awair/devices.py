@@ -75,9 +75,11 @@ class AwairDevice:
     .. _`Awair Baby`: https://getawair.com/pages/awair-baby
     .. _`Awair Element`: https://getawair.com/pages/awair-element
     .. _`Awair Glow C`: https://getawair.com/pages/awair-glow
-    .. _`Awair Glow`: https://web.archive.org/web/20161210171139/https://getawair.com/pages/awair-glow
+    .. _`Awair Glow`:
+      https://web.archive.org/web/20161210171139/https://getawair.com/pages/awair-glow
     .. _`Awair Omni`: https://getawair.com/pages/awair-for-business
-    .. _`Awair (1st Edition)`: https://web.archive.org/web/20150528004143/https://getawair.com/
+    .. _`Awair (1st Edition)`:
+      https://web.archive.org/web/20150528004143/https://getawair.com/
     """
 
     mac_address: Optional[str]
@@ -173,9 +175,11 @@ class AwairDevice:
         .. _`Awair Baby`: https://getawair.com/pages/awair-baby
         .. _`Awair Element`: https://getawair.com/pages/awair-element
         .. _`Awair Glow C`: https://getawair.com/pages/awair-glow
-        .. _`Awair Glow`: https://web.archive.org/web/20161210171139/https://getawair.com/pages/awair-glow
+        .. _`Awair Glow`:
+          https://web.archive.org/web/20161210171139/https://getawair.com/pages/awair-glow
         .. _`Awair Omni`: https://getawair.com/pages/awair-for-business
-        .. _`Awair (1st Edition)`: https://web.archive.org/web/20150528004143/https://getawair.com/
+        .. _`Awair (1st Edition)`:
+          https://web.archive.org/web/20150528004143/https://getawair.com/
         """
         return const.AWAIR_MODELS.get(self.device_type, self.device_type)
 
@@ -343,8 +347,6 @@ class AwairDevice:
 
         response = await self.client.query(url)
         return [AirData(data) for data in response.get("data", [])]
-
-    # TODO: Implement device api usages!
 
     @staticmethod
     def _format_args(kind: str, **kwargs: AirDataParam) -> str:
