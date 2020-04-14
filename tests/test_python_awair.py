@@ -436,6 +436,9 @@ def test_attrdict() -> Any:
     comp["nope"] = "hi"
     assert comp.nope == "hi"
 
+    comp.nope = "hello"
+    assert comp.nope == "hello"
+
     del comp["nope"]
     del comp.humidity
 
