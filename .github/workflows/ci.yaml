@@ -26,9 +26,9 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cache/pypoetry/virtualenvs
-          key: ${{ runner.os }}-v1-poetry-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
+          key: ${{ runner.os }}-v2-poetry-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
           restore-keys: |
-            ${{ runner.os }}-v1-poetry-${{ matrix.python-version }}
+            ${{ runner.os }}-v2-poetry-${{ matrix.python-version }}
       - name: Install dependencies
         run: poetry install -E linters
       - name: Tests

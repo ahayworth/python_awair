@@ -27,9 +27,7 @@ Dive into our [documentation](https://python-awair.readthedocs.io/en/latest) to 
 - A variety of linters are available and CI enforces them
 
 After installing and configuring poetry:
-- Run `poetry install` to install all dependencies
-  - Run `poetry install -E linters` to install recommended linters
-  - Run `poetry install -E docs` if you wish to rebuild docs
+- Run `poetry install` to install dev dependencies
 - Run `poetry shell` to drop into a virtualenv
 - Run `poetry run tox` (or just `tox` if you're in a virtualenv) to test
   - Run `poetry run tox -e lint` (or just `tox -e lint` if you're in a virtualenv) to run linters.
