@@ -1,0 +1,48 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: GET
+    uri: http://awair-elem-1419e1.local/settings/config/data
+  response:
+    body:
+      string: '{"device_uuid":"awair-element_5366","wifi_mac":"70:88:6B:14:19:E1","ssid":"morpac-east","ip":"192.168.1.225","netmask":"255.255.255.0","gateway":"none","fw_version":"1.1.5","timezone":"America/Los_Angeles","display":"co2","led":{"mode":"manual","brightness":73},"voc_feature_set":"Unknown"}'
+    headers:
+      Access-Control-Allow-Origin: '*'
+      Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+      Connection: Keep-Alive
+      Content-Type: application/json
+      Pragma: no-cache
+      Transfer-Encoding: chunked
+    status:
+      code: 200
+      message: OK
+    url: http://awair-elem-1419e1.local/settings/config/data
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: GET
+    uri: http://awair-elem-1419e1.local/air-data/latest
+  response:
+    body:
+      string: '{"timestamp":"2020-08-31T22:07:03.831Z","score":93,"dew_point":11.11,"temp":19.59,"humid":58.05,"abs_humid":9.77,"co2":408,"co2_est":400,"voc":159,"voc_baseline":2533859097,"voc_h2_raw":28,"voc_ethanol_raw":40,"pm25":2,"pm10_est":3}'
+    headers:
+      Access-Control-Allow-Origin: '*'
+      Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+      Connection: Keep-Alive
+      Content-Type: application/json
+      Pragma: no-cache
+      Transfer-Encoding: chunked
+    status:
+      code: 200
+      message: OK
+    url: http://awair-elem-1419e1.local/air-data/latest
+version: 1

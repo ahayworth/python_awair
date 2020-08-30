@@ -1,8 +1,9 @@
 """Class to describe an Awair device."""
 
 import urllib
+from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 import voluptuous as vol
 
@@ -13,7 +14,7 @@ from python_awair.client import AwairClient
 AirDataParam = Union[datetime, bool, int, None]
 
 
-class AwairDevice:
+class AwairBaseDevice(ABC):
     """An Awair device.
 
     This class serves two purposes - it provides metadata about
@@ -336,17 +337,25 @@ class AwairDevice:
         """
         return await self.__get_airdata("raw", **kwargs)
 
+    @abstractmethod
+    def _get_airdata_base_url(self) -> str:
+        """Get the base URL to use for airdata."""
+        raise TypeError("expected subclass to define override")
+
+    @abstractmethod
+    def _extract_airdata(self, response: Any) -> List[Any]:
+        """Get the data object out of a response."""
+        raise TypeError("expected subclass to define override")
+
     async def __get_airdata(self, kind: str, **kwargs: AirDataParam) -> List[AirData]:
         """Call one of several varying air-data API endpoints."""
-        url = "/".join(
-            [const.DEVICE_URL, self.device_type, str(self.device_id), "air-data", kind]
-        )
+        url = "/".join([self._get_airdata_base_url(), "air-data", kind])
 
         if kwargs is not None:
             url += self._format_args(kind, **kwargs)
 
         response = await self.client.query(url)
-        return [AirData(data) for data in response.get("data", [])]
+        return [AirData(data) for data in self._extract_airdata(response)]
 
     @staticmethod
     def _format_args(kind: str, **kwargs: AirDataParam) -> str:
@@ -407,3 +416,70 @@ class AwairDevice:
             return "?" + urllib.parse.urlencode(args)
 
         return ""
+
+
+class AwairDevice(AwairBaseDevice):
+    """A cloud-based Awair device."""
+
+    def _get_airdata_base_url(self) -> str:
+        """Get the base URL to use for airdata."""
+        return "/".join([const.DEVICE_URL, self.device_type, str(self.device_id)])
+
+    def _extract_airdata(self, response: Any) -> List[Any]:
+        """Get the data object out of a response."""
+        return cast(List[Any], response.get("data", []))
+
+
+class AwairLocalDevice(AwairBaseDevice):
+    """A local Awair device."""
+
+    device_addr: str
+    """The DNS or IP address of the device."""
+
+    def __init__(
+        self, client: AwairClient, device_addr: str, attributes: Dict[str, Any]
+    ):
+        """Initialize an awair local device from API attributes."""
+        # the format of the config endpoint for local sensors is different than
+        # the cloud API.
+        device_uuid: str = attributes["device_uuid"]
+        [device_type, device_id_str] = device_uuid.split("_", 1)
+        device_id = int(device_id_str)
+        attributes["deviceId"] = device_id
+        attributes["deviceUUID"] = device_uuid
+        attributes["deviceType"] = device_type
+        attributes["macAddress"] = attributes.get("wifi_mac", None)
+        super().__init__(client, attributes)
+        self.device_addr = device_addr
+
+    def _get_airdata_base_url(self) -> str:
+        """Get the base URL to use for airdata."""
+        return f"http://{self.device_addr}"
+
+    def _extract_airdata(self, response: Any) -> List[Any]:
+        """Get the data object out of a response."""
+        # reformat local sensors response to match the cloud API
+        top_level = {"timestamp", "score"}
+        sensors = [
+            {"comp": k, "value": response[k]}
+            for k in response.keys()
+            if k not in top_level
+        ]
+        data = {
+            "timestamp": response["timestamp"],
+            "score": response["score"],
+            "sensors": sensors,
+        }
+
+        return [data]
+
+    @staticmethod
+    def _format_args(kind: str, **kwargs: AirDataParam) -> str:
+        if "fahrenheit" in kwargs:
+            if kwargs["fahrenheit"]:
+                raise ValueError("fahrenheit is not supported for local sensors yet")
+            # if we pass any URL parameters with local sensors, it causes the
+            # timestamp to be the empty string.
+            del kwargs["fahrenheit"]
+
+        return AwairBaseDevice._format_args(kind, **kwargs)

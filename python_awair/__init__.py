@@ -10,13 +10,15 @@ to the "user" portions of the API.
 .. _`developer console`: https://developer.getawair.com
 """
 
-from typing import Optional
+from asyncio import gather
+from typing import List, Optional
 
 from aiohttp import ClientSession
 
 from python_awair import const
 from python_awair.auth import AccessTokenAuth, AwairAuth
 from python_awair.client import AwairClient
+from python_awair.devices import AwairLocalDevice
 from python_awair.exceptions import AwairError
 from python_awair.user import AwairUser
 
@@ -69,3 +71,39 @@ class Awair:
         """
         response = await self.client.query(const.USER_URL)
         return AwairUser(client=self.client, attributes=response)
+
+
+class AwairLocal:
+    """Entry class for the local sensors Awair API."""
+
+    client: AwairClient
+    """AwairClient: The instantiated AwairClient
+        that will be used to fetch API responses and
+        check for HTTP errors.
+    """
+
+    _device_addrs: List[str]
+    """IP or DNS addresses of Awair devices with the local sensors API enabled."""
+
+    def __init__(self, session: ClientSession, device_addrs: List[str]) -> None:
+        """Initialize the Awair local sensors API wrapper."""
+        self._device_addrs = device_addrs
+        if len(device_addrs) > 0:
+            self.client = AwairClient(AccessTokenAuth(""), session)
+        else:
+            raise AwairError("No local Awair device addresses supplied!")
+
+    async def devices(self) -> List[AwairLocalDevice]:
+        """Return a list of local awair devices."""
+        responses = await gather(
+            *(
+                self.client.query(f"http://{addr}/settings/config/data")
+                for addr in self._device_addrs
+            )
+        )
+        return [
+            AwairLocalDevice(
+                client=self.client, device_addr=self._device_addrs[i], attributes=device
+            )
+            for i, device in enumerate(responses)
+        ]

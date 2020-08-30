@@ -8,12 +8,14 @@ import aiohttp
 import pytest
 import voluptuous as vol
 
-from python_awair import Awair, const
+from python_awair import Awair, AwairLocal, const
 from python_awair.attrdict import AttrDict
 from python_awair.exceptions import AuthError, AwairError, NotFoundError, QueryError
 from tests.const import (
     ACCESS_TOKEN,
     AWAIR_GEN1_ID,
+    MOCK_ELEMENT_DEVICE_A_ATTRS,
+    MOCK_ELEMENT_DEVICE_B_ATTRS,
     MOCK_GEN2_DEVICE_ATTRS,
     MOCK_GLOW_DEVICE_ATTRS,
     MOCK_MINT_DEVICE_ATTRS,
@@ -65,6 +67,29 @@ async def test_get_devices() -> Any:
     assert "<AwairDevice" in str(devices[0])
 
 
+async def test_get_local_devices() -> Any:
+    """Test that we can get a list of devices."""
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("local_devices.yaml"):
+            awair = AwairLocal(
+                session=session,
+                device_addrs=["AWAIR-ELEM-1416DC.local", "AWAIR-ELEM-1419E1.local"],
+            )
+            devices = await awair.devices()
+
+    assert len(devices) == 2
+
+    assert devices[0].device_id == MOCK_ELEMENT_DEVICE_A_ATTRS["deviceId"]
+    assert devices[0].device_type == MOCK_ELEMENT_DEVICE_A_ATTRS["deviceType"]
+    assert devices[0].uuid == MOCK_ELEMENT_DEVICE_A_ATTRS["deviceUUID"]
+    assert "<AwairDevice" in str(devices[0])
+
+    assert devices[1].device_id == MOCK_ELEMENT_DEVICE_B_ATTRS["deviceId"]
+    assert devices[1].device_type == MOCK_ELEMENT_DEVICE_B_ATTRS["deviceType"]
+    assert devices[1].uuid == MOCK_ELEMENT_DEVICE_B_ATTRS["deviceUUID"]
+    assert "<AwairDevice" in str(devices[1])
+
+
 async def test_get_latest() -> Any:
     """Test that we can get the latest air data."""
     target = datetime(2020, 4, 10, 10, 38, 30)
@@ -80,6 +105,27 @@ async def test_get_latest() -> Any:
     assert resp.sensors["temperature"] == 21.770000457763672
     assert resp.indices["temperature"] == -1.0
     assert "<AirData@2020-04-10" in str(resp)
+
+
+async def test_get_latest_local() -> Any:
+    """Test that we can get the latest air data."""
+    target = datetime(2020, 8, 31, 22, 7, 3)
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("latest_local.yaml"), time_travel(target):
+            awair = AwairLocal(
+                session=session, device_addrs=["AWAIR-ELEM-1419E1.local"]
+            )
+            devices = await awair.devices()
+            assert len(devices) == 1
+            device = devices[0]
+            resp = await device.air_data_latest()
+
+    assert resp is not None
+    assert resp.timestamp == datetime(2020, 8, 31, 22, 7, 3, 831000)
+    assert resp.score == 93
+    assert resp.sensors["temperature"] == 19.59
+    assert len(resp.indices) == 0
+    assert "<AirData@2020-08-31" in str(resp)
 
 
 async def test_get_five_minute() -> Any:

@@ -1,0 +1,48 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: GET
+    uri: http://awair-elem-1416dc.local/settings/config/data
+  response:
+    body:
+      string: '{"device_uuid":"awair-element_6049","wifi_mac":"70:88:6B:14:16:DC","ssid":"morpac-east","ip":"192.168.1.133","netmask":"255.255.255.0","gateway":"none","fw_version":"1.1.5","timezone":"America/Los_Angeles","display":"clock","led":{"mode":"auto","brightness":179},"voc_feature_set":"Unknown"}'
+    headers:
+      Access-Control-Allow-Origin: '*'
+      Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+      Connection: Keep-Alive
+      Content-Type: application/json
+      Pragma: no-cache
+      Transfer-Encoding: chunked
+    status:
+      code: 200
+      message: OK
+    url: http://awair-elem-1416dc.local/settings/config/data
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: GET
+    uri: http://awair-elem-1419e1.local/settings/config/data
+  response:
+    body:
+      string: '{"device_uuid":"awair-element_5366","wifi_mac":"70:88:6B:14:19:E1","ssid":"morpac-east","ip":"192.168.1.225","netmask":"255.255.255.0","gateway":"none","fw_version":"1.1.5","timezone":"America/Los_Angeles","display":"co2","led":{"mode":"manual","brightness":73},"voc_feature_set":"Unknown"}'
+    headers:
+      Access-Control-Allow-Origin: '*'
+      Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+      Connection: Keep-Alive
+      Content-Type: application/json
+      Pragma: no-cache
+      Transfer-Encoding: chunked
+    status:
+      code: 200
+      message: OK
+    url: http://awair-elem-1419e1.local/settings/config/data
+version: 1
