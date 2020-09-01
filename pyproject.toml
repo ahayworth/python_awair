@@ -62,7 +62,7 @@ whitelist_externals = poetry
 commands =
   poetry run black . --check
   poetry run isort --check python_awair/ tests/
-  poetry run flake8
+  poetry run flake8 python_awair/ tests/
   poetry run pylint python_awair/ tests/
   poetry run mypy python_awair/ tests/
 
