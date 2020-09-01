@@ -103,7 +103,7 @@ async def test_get_fifteen_minute() -> Any:
     """Test that we can get the fifteen-minute avg air data."""
     target = datetime(2020, 4, 10, 10, 38, 31, 252873)
     async with aiohttp.ClientSession() as session:
-        with VCR.use_cassette("fifteen_minute.yaml"):
+        with VCR.use_cassette("fifteen_minute.yaml"), time_travel(target):
             awair = Awair(session=session, access_token=ACCESS_TOKEN)
             device = mock_awair_device(client=awair.client)
             resp = await device.air_data_fifteen_minute(
