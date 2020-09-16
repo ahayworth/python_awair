@@ -104,3 +104,6 @@ venv.bak/
 .mypy_cache/
 
 script/
+
+# PyCharm/IntelliJ project directory
+/.idea

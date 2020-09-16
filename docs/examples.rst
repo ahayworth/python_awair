@@ -140,3 +140,61 @@ Fetching data from a different time
           print(f"{sensor}: {round(value, 2)}")
           if sensor in datum.indices:
             print(f"  awair index: {datum.indices[sensor]}")
+
+Sample local sensors program
+=================================
+
+Awair recently added the `local sensors API`_, where you can retrieve current (and only current)
+air data from devices on your local network over HTTP.
+
+.. _`local sensors API`: https://docs.google.com/document/d/1001C-ro_ig7aEyz0GiWUiiJn0M6DLj47BYWj31acesg/edit
+
+.. code:: python
+
+  import asyncio
+  import aiohttp
+  from python_awair import AwairLocal
+
+  async def data():
+      async with aiohttp.ClientSession() as session:
+          # Instantiate a client with your access token, and an asyncio session:
+          client = AwairLocal(
+              session=session, device_addrs=["AWAIR-ELEM-1419E1.local"]
+          )
+
+          # List the local devices:
+          devices = await client.devices()
+
+          # Get some air quality data for a user's device:
+          data = await devices[0].air_data_latest()
+
+          # Print things out!
+          print(f"Device: {devices[0]}")
+
+          # You can access sensors as dict items:
+          for sensor, value in data.sensors.items():
+              print(f"  {sensor}: {round(value, 2)}")
+
+          # Or, as attributes:
+          print(f"  temperature again: {round(data.sensors.temperature, 2)}")
+
+  asyncio.run(data())
+
+Running this sample prints::
+
+  $ python awair_local_demo.py
+  Device: <AwairDevice: uuid=awair-element_5366 model=Awair Element>
+    dew_point: 10.81
+    abs_humid: 9.59
+    co2_est: 461
+    voc_baseline: 2536742680
+    voc_h2_raw: 27
+    voc_ethanol_raw: 39
+    pm10_est: 3
+    temperature: 19.16
+    humidity: 58.46
+    carbon_dioxide: 438
+    volatile_organic_compounds: 384
+    particulate_matter_2_5: 2
+    temperature again: 19.16
+

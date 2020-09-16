@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "python-awair"
-version = "0.1.1"
+version = "0.2.0"
 description = "asyncio client for the Awair GraphQL API"
 authors = ["Andrew Hayworth <ahayworth@gmail.com>"]
 license = "MIT"
@@ -61,8 +61,8 @@ commands = poetry run pytest {posargs}
 whitelist_externals = poetry
 commands =
   poetry run black . --check
-  poetry run isort -c
-  poetry run flake8
+  poetry run isort --check python_awair/ tests/
+  poetry run flake8 python_awair/ tests/
   poetry run pylint python_awair/ tests/
   poetry run mypy python_awair/ tests/
 

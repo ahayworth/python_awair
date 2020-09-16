@@ -30,3 +30,13 @@ MOCK_GLOW_DEVICE_ATTRS = {
     "deviceUUID": "awair-glow_1405",
 }
 MOCK_USER_ATTRS = {"id": "32406"}
+MOCK_ELEMENT_DEVICE_A_ATTRS = {
+    "deviceId": 6049,
+    "deviceType": "awair-element",
+    "deviceUUID": "awair-element_6049",
+}
+MOCK_ELEMENT_DEVICE_B_ATTRS = {
+    "deviceId": 5366,
+    "deviceType": "awair-element",
+    "deviceUUID": "awair-element_5366",
+}
