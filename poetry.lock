@@ -936,7 +936,7 @@ description = "# Voluptuous is a Python data validation library"
 name = "voluptuous"
 optional = false
 python-versions = "*"
-version = ">=0.11.7,<0.13.0"
+version = "0.11.7"
 
 [[package]]
 category = "dev"
@@ -1453,7 +1453,7 @@ virtualenv = [
     {file = "virtualenv-20.0.17.tar.gz", hash = "sha256:c8364ec469084046c779c9a11ae6340094e8a0bf1d844330fc55c1cefe67c172"},
 ]
 voluptuous = [
-    {file = "voluptuous-0.12.0.tar.gz", hash = "sha256:3a4ef294e16f6950c79de4cba88f31092a107e6e3aaa29950b43e2bb9e1bb2dc"},
+    {file = "voluptuous-0.11.7.tar.gz", hash = "sha256:2abc341dbc740c5e2302c7f9b8e2e243194fb4772585b991931cb5b22e9bf456"},
 ]
 wcwidth = [
     {file = "wcwidth-0.1.9-py2.py3-none-any.whl", hash = "sha256:cafe2186b3c009a04067022ce1dcd79cb38d8d65ee4f4791b8888d6599d1bbe1"},
