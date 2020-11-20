@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "python-awair"
-version = "0.2.0"
+version = "0.2.1"
 description = "asyncio client for the Awair GraphQL API"
 authors = ["Andrew Hayworth <ahayworth@gmail.com>"]
 license = "MIT"
@@ -19,7 +19,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.6"
-aiohttp = "~3.6.1"
+aiohttp = "^3.6.1"
 voluptuous = ">=0.11.7,<0.13.0"
 
 [tool.poetry.dev-dependencies]
