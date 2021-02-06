@@ -10,9 +10,7 @@ async def fetch_data():
     """Get data from local Awair device."""
     async with aiohttp.ClientSession() as session:
         device_address = os.environ.get("AWAIR_DEVICE", "AWAIR-ELEM-1419E1.local")
-        client = AwairLocal(
-            session=session, device_addrs=[device_address]
-        )
+        client = AwairLocal(session=session, device_addrs=[device_address])
 
         # List the local devices:
         devices = await client.devices()
@@ -29,5 +27,6 @@ async def fetch_data():
 
         # Or, as attributes:
         print(f"  temperature again: {round(data.sensors.temperature, 2)}")
+
 
 asyncio.run(fetch_data())
