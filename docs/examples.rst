@@ -8,42 +8,13 @@ Examples
 Sample program
 ==============
 
-.. code:: python
-
-  import asyncio
-  import aiohttp
-  from python_awair import Awair
-
-  async def data():
-      async with aiohttp.ClientSession() as session:
-          # Instantiate a client with your access token, and an asyncio session:
-          client = Awair(access_token="token", session=session)
-
-          # Retrieve a user object:
-          user = await client.user()
-
-          # List that user's devices:
-          devices = await user.devices()
-
-          # Get some air quality data for a user's device:
-          data = await devices[0].air_data_latest()
-
-          # Print things out!
-          print(f"Device: {devices[0]}")
-
-          # You can access sensors as dict items:
-          for sensor, value in data.sensors.items():
-              print(f"  {sensor}: {round(value, 2)}")
-
-          # Or, as attributes:
-          print(f"  temperature again: {round(data.sensors.temperature, 2)}")
-
-  asyncio.run(data())
+.. literalinclude:: ../examples/remote.py
+   :language: python
 
 
 Here's what running that sample would print::
 
-  $ python awair_demo.py
+  $ AWAIR_TOKEN=foo python examples/remote.py
   Device: <AwairDevice: uuid=awair_24947 model=Awair>
     dust: 13.7
     temperature: 22.12
@@ -149,40 +120,12 @@ air data from devices on your local network over HTTP.
 
 .. _`local sensors API`: https://docs.google.com/document/d/1001C-ro_ig7aEyz0GiWUiiJn0M6DLj47BYWj31acesg/edit
 
-.. code:: python
-
-  import asyncio
-  import aiohttp
-  from python_awair import AwairLocal
-
-  async def data():
-      async with aiohttp.ClientSession() as session:
-          # Instantiate a client with your access token, and an asyncio session:
-          client = AwairLocal(
-              session=session, device_addrs=["AWAIR-ELEM-1419E1.local"]
-          )
-
-          # List the local devices:
-          devices = await client.devices()
-
-          # Get some air quality data for a user's device:
-          data = await devices[0].air_data_latest()
-
-          # Print things out!
-          print(f"Device: {devices[0]}")
-
-          # You can access sensors as dict items:
-          for sensor, value in data.sensors.items():
-              print(f"  {sensor}: {round(value, 2)}")
-
-          # Or, as attributes:
-          print(f"  temperature again: {round(data.sensors.temperature, 2)}")
-
-  asyncio.run(data())
+.. literalinclude:: ../examples/local.py
+   :language: python
 
 Running this sample prints::
 
-  $ python awair_local_demo.py
+  $ AWAIR_DEVICE=192.168.0.5 python examples/local.py
   Device: <AwairDevice: uuid=awair-element_5366 model=Awair Element>
     dew_point: 10.81
     abs_humid: 9.59
