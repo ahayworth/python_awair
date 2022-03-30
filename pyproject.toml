@@ -48,7 +48,7 @@ vcrpy = "^4.0.2"
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py36, py37, py38
+envlist = py36, py37, py38, py39, py310
 isolated_build = True
 skipsdist = True
 skip_missing_interpreters = True
