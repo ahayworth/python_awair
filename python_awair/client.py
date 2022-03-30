@@ -64,7 +64,7 @@ class AwairClient:
         if resp.status == 400:
             raise QueryError()
 
-        if resp.status == 401 or resp.status == 403:
+        if resp.status in (401, 403):
             raise AuthError()
 
         if resp.status == 404:
