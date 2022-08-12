@@ -20,6 +20,7 @@ async def fetch_data():
 
         # Print things out!
         print(f"Device: {devices[0]}")
+        print(f"Device firmware: {devices[0].fw_version}")
 
         # You can access sensors as dict items:
         for sensor, value in data.sensors.items():

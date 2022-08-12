@@ -436,6 +436,9 @@ class AwairLocalDevice(AwairBaseDevice):
     device_addr: str
     """The DNS or IP address of the device."""
 
+    fw_version: str
+    """The firmware version currently running on the device."""
+
     def __init__(
         self, client: AwairClient, device_addr: str, attributes: Dict[str, Any]
     ):
@@ -451,6 +454,7 @@ class AwairLocalDevice(AwairBaseDevice):
         attributes["macAddress"] = attributes.get("wifi_mac", None)
         super().__init__(client, attributes)
         self.device_addr = device_addr
+        self.fw_version = attributes.get("fw_version", None)
 
     def _get_airdata_base_url(self) -> str:
         """Get the base URL to use for airdata."""

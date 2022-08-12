@@ -82,11 +82,13 @@ async def test_get_local_devices() -> Any:
     assert devices[0].device_id == MOCK_ELEMENT_DEVICE_A_ATTRS["deviceId"]
     assert devices[0].device_type == MOCK_ELEMENT_DEVICE_A_ATTRS["deviceType"]
     assert devices[0].uuid == MOCK_ELEMENT_DEVICE_A_ATTRS["deviceUUID"]
+    assert devices[0].fw_version == MOCK_ELEMENT_DEVICE_A_ATTRS["fw_version"]
     assert "<AwairDevice" in str(devices[0])
 
     assert devices[1].device_id == MOCK_ELEMENT_DEVICE_B_ATTRS["deviceId"]
     assert devices[1].device_type == MOCK_ELEMENT_DEVICE_B_ATTRS["deviceType"]
     assert devices[1].uuid == MOCK_ELEMENT_DEVICE_B_ATTRS["deviceUUID"]
+    assert devices[1].fw_version == MOCK_ELEMENT_DEVICE_B_ATTRS["fw_version"]
     assert "<AwairDevice" in str(devices[1])
 
 
