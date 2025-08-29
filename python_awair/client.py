@@ -1,5 +1,6 @@
 """Wrapper class to query the Awair API."""
 
+import json as Json
 from typing import Any, Dict, NoReturn
 
 from aiohttp import ClientResponse, ClientSession
@@ -17,7 +18,11 @@ from python_awair.exceptions import (
 class AwairClient:
     """Python asyncio client for the Awair GraphQL API."""
 
-    def __init__(self, authenticator: AwairAuth, session: ClientSession,) -> None:
+    def __init__(
+        self,
+        authenticator: AwairAuth,
+        session: ClientSession,
+    ) -> None:
         """Initialize an AwairClient with sensible defaults."""
         self.__authenticator = authenticator
         self.__session = session
@@ -29,7 +34,14 @@ class AwairClient:
             if resp.status != 200:
                 self.__handle_non_200_error(resp)
 
-            json = await resp.json()
+            if (
+                resp.content_type == "text/html"
+            ):  # Response could be from Awair Omni Ethernet backpack https://github.com/home-assistant/core/issues/147682
+                text = await resp.text()
+                json = Json.loads(text)
+            else:
+                json = await resp.json()
+
             self.__check_errors_array(json)
 
             return json
