@@ -1,2 +1,2 @@
 [MESSAGES CONTROL]
-disable=bad-continuation,too-few-public-methods,too-many-instance-attributes
+disable=too-few-public-methods,too-many-instance-attributes

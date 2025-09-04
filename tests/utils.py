@@ -22,7 +22,8 @@ def mock_awair_user(client: AwairClient) -> AwairUser:
 
 
 def mock_awair_device(
-    client: AwairClient, device: Optional[Dict[str, Any]] = None,
+    client: AwairClient,
+    device: Optional[Dict[str, Any]] = None,
 ) -> AwairDevice:
     """Return a mock awair device."""
     if not device:

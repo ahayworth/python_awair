@@ -9,27 +9,29 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9, "3.10"]
+        python-version: [3.9, "3.10", "3.11", "3.12", "3.13"]
         include:
-          - python-version: 3.7
-            toxenv: py37
-          - python-version: 3.8
-            toxenv: py38
           - python-version: 3.9
             toxenv: py39
           - python-version: "3.10"
             toxenv: py310
+          - python-version: "3.11"
+            toxenv: py311
+          - python-version: "3.12"
+            toxenv: py312
+          - python-version: "3.13"
+            toxenv: py313
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Set up poetry
-        uses: Gr1N/setup-poetry@v7
+        uses: Gr1N/setup-poetry@v9
       - name: Cache dependencies
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-v2-poetry-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
@@ -43,10 +45,10 @@ jobs:
       - name: Linters
         run: |
           poetry run tox -e lint
-        if: matrix.python-version == '3.8'
+        if: matrix.python-version == '3.9'
       - name: Coverage
         run: |
           poetry run tox -e coverage
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        if: matrix.python-version == '3.8'
+        if: matrix.python-version == '3.9'
