@@ -171,7 +171,7 @@ async def test_get_raw() -> Any:
         with VCR.use_cassette("raw.yaml"), time_travel(target):
             awair = Awair(session=session, access_token=ACCESS_TOKEN)
             device = mock_awair_device(client=awair.client)
-            resp = await device.air_data_raw(from_date=(target - timedelta(minutes=30)))
+            resp = await device.air_data_raw(from_date=target - timedelta(minutes=30))
 
     assert resp[0].timestamp == datetime(2020, 4, 10, 15, 38, 24, 111000)
     assert resp[0].score == 88.0
@@ -449,19 +449,19 @@ async def test_air_data_handles_datetime_limits() -> Any:
         now = datetime.now()
 
         with pytest.raises(vol.Invalid):
-            await device.air_data_raw(from_date=(now + timedelta(hours=1)))
+            await device.air_data_raw(from_date=now + timedelta(hours=1))
 
         with pytest.raises(vol.Invalid):
             await device.air_data_raw(from_date=False)
 
         with pytest.raises(vol.Invalid):
-            await device.air_data_raw(from_date=(now - timedelta(hours=2)))
+            await device.air_data_raw(from_date=now - timedelta(hours=2))
 
         with pytest.raises(vol.Invalid):
-            await device.air_data_five_minute(from_date=(now - timedelta(hours=25)))
+            await device.air_data_five_minute(from_date=now - timedelta(hours=25))
 
         with pytest.raises(vol.Invalid):
-            await device.air_data_fifteen_minute(from_date=(now - timedelta(days=8)))
+            await device.air_data_fifteen_minute(from_date=now - timedelta(days=8))
 
         with pytest.raises(vol.Invalid):
             await device.air_data_fifteen_minute(

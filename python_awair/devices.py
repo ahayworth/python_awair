@@ -436,7 +436,7 @@ class AwairLocalDevice(AwairBaseDevice):
     device_addr: str
     """The DNS or IP address of the device."""
 
-    fw_version: str
+    fw_version: Optional[str]
     """The firmware version currently running on the device."""
 
     def __init__(
