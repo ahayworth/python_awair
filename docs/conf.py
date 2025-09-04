@@ -1,4 +1,5 @@
 """Sphinx configuration for python_awair."""
+
 # pylint: skip-file
 import os
 import sys

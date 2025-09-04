@@ -1,4 +1,5 @@
 """Indices dict with attribute access."""
+
 from python_awair.attrdict import AttrDict
 
 

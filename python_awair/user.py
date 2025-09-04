@@ -1,6 +1,5 @@
 """An Awair user."""
 
-
 from datetime import date
 from typing import Any, Dict, List, Optional
 
@@ -116,7 +115,7 @@ class AwairUser:
         dob_month = attributes.get("dobMonth", None)
         dob_year = attributes.get("dobYear", None)
 
-        if all([dob_day, dob_month, dob_year]):
+        if dob_day and dob_month and dob_year:
             self.dob = date(day=dob_day, month=dob_month, year=dob_year)
         else:
             self.dob = None
