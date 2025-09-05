@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "python-awair"
-version = "0.2.4"
+version = "0.2.5"
 description = "asyncio client for the Awair GraphQL and Local APIs"
 authors = ["Andrew Hayworth <ahayworth@gmail.com>"]
 license = "MIT"
