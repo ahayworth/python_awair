@@ -5,8 +5,8 @@
 [![codecov](https://codecov.io/gh/ahayworth/python_awair/branch/master/graph/badge.svg)](https://codecov.io/gh/ahayworth/python_awair)
 [![Documentation Status](https://readthedocs.org/projects/python-awair/badge/?version=latest)](https://python-awair.readthedocs.io/en/latest/?badge=latest)
 
-This is an async library which accesses portions of the [Awair](https://getawair.com) REST API. It exists primarily
-to support the Home Assistant integration, but is considered active and supported by its author. PRs welcome!
+This is an async library which accesses portions of the [Awair](https://getawair.com) REST API, and it exists primarily
+to support the Home Assistant integration for Awair devices.
 
 Features:
 - Object-oriented approach to querying and handling data
@@ -19,6 +19,15 @@ Not yet supported:
 - Device management (such as changing the display of a device)
 
 Dive into our [documentation](https://python-awair.readthedocs.io/en/latest) to get started!
+
+# Status
+
+This project could be considered in "maintenance mode". It meets the needs of the Home Assistant integration,
+and there are no current plans to add new features. Large PRs adding significant new features or drastically
+changing the library are unlikely to be accepted without prior discussion (please open an issue first).
+
+However, bug fixes and updates to support python and/or Home Assistant compatibility are welcomed and accepted!
+I intend to keep passively maintaining the library, and please open an issue if there is an unaddressed need.
 
 # Development
 
