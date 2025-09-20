@@ -42,3 +42,9 @@ MOCK_ELEMENT_DEVICE_B_ATTRS = {
     "deviceUUID": "awair-element_5366",
     "fw_version": "1.2.8",
 }
+MOCK_ELEMENT_DEVICE_C_ATTRS = {
+    "deviceId": 18959,
+    "deviceType": "awair-omni",
+    "deviceUUID": "awair-omni_18959",
+    "fw_version": "1.8.1",
+}

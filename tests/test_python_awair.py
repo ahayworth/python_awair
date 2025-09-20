@@ -16,6 +16,7 @@ from tests.const import (
     AWAIR_GEN1_ID,
     MOCK_ELEMENT_DEVICE_A_ATTRS,
     MOCK_ELEMENT_DEVICE_B_ATTRS,
+    MOCK_ELEMENT_DEVICE_C_ATTRS,
     MOCK_GEN2_DEVICE_ATTRS,
     MOCK_GLOW_DEVICE_ATTRS,
     MOCK_MINT_DEVICE_ATTRS,
@@ -92,6 +93,27 @@ async def test_get_local_devices() -> Any:
     assert "<AwairDevice" in str(devices[1])
 
 
+async def test_get_local_backplate_devices() -> Any:
+    """Test that we can get a list of devices."""
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("local_backplate.yaml"):
+            awair = AwairLocal(
+                session=session,
+                device_addrs=[
+                    "AWAIR-OMNI-18959-BACKPLATE.local",
+                ],
+            )
+            devices = await awair.devices()
+
+    assert len(devices) == 1
+
+    assert devices[0].device_id == MOCK_ELEMENT_DEVICE_C_ATTRS["deviceId"]
+    assert devices[0].device_type == MOCK_ELEMENT_DEVICE_C_ATTRS["deviceType"]
+    assert devices[0].uuid == MOCK_ELEMENT_DEVICE_C_ATTRS["deviceUUID"]
+    assert devices[0].fw_version == MOCK_ELEMENT_DEVICE_C_ATTRS["fw_version"]
+    assert "<AwairDevice" in str(devices[0])
+
+
 async def test_get_latest() -> Any:
     """Test that we can get the latest air data."""
     target = datetime(2020, 4, 10, 10, 38, 30)
@@ -128,6 +150,27 @@ async def test_get_latest_local() -> Any:
     assert resp.sensors["temperature"] == 19.59
     assert len(resp.indices) == 0
     assert "<AirData@2020-08-31" in str(resp)
+
+
+async def test_get_latest_local_backplate() -> Any:
+    """Test that we can get the latest air data."""
+    target = datetime(2025, 9, 20, 13, 24, 38)
+    async with aiohttp.ClientSession() as session:
+        with VCR.use_cassette("latest_local_backplate.yaml"), time_travel(target):
+            awair = AwairLocal(
+                session=session, device_addrs=["AWAIR-OMNI-18959-BACKPLATE.local"]
+            )
+            devices = await awair.devices()
+            assert len(devices) == 1
+            device = devices[0]
+            resp = await device.air_data_latest()
+
+    assert resp is not None
+    assert resp.timestamp == datetime(2025, 9, 20, 13, 24, 38, 359000)
+    assert resp.score == 99
+    assert resp.sensors["temperature"] == 22.12
+    assert len(resp.indices) == 0
+    assert "<AirData@2025-09-20" in str(resp)
 
 
 async def test_get_five_minute() -> Any:
