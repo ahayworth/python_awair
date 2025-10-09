@@ -1,0 +1,42 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: GET
+    uri: http://awair-omni-18959-backplate.local/settings/config/data
+  response:
+    body:
+      string: '{"device_uuid":"awair-omni_18959","wifi_mac":"E8:C0:01:78:16:ED","ip":"192.168.0.101","netmask":"255.255.255.0","gateway":"192.168.0.1","fw_version":"1.8.1","timezone":"America/Los_Angeles","display":"score","led":{"mode":"auto","brightness":70},"power-status":{"battery":99,"plugged":true}}'
+    headers:
+      Access-Control-Allow-Origin: '*'
+      Content-Type: text/html
+      Transfer-Encoding: chunked
+    status:
+      code: 200
+      message: OK
+    url: http://awair-omni-18959-backplate.local/settings/config/data
+- request:
+    body: null
+    headers:
+      Content-Type:
+      - application/json
+      authorization:
+      - fake_token
+    method: GET
+    uri: http://awair-omni-18959-backplate.local/air-data/latest
+  response:
+    body:
+      string: '{"timestamp":"2025-09-20T13:24:38.359Z","score":99,"temp":22.12,"humid":51.90,"co2":424,"voc":33,"pm25":1,"lux":0.0,"spl_a":51.9}'
+    headers:
+      Access-Control-Allow-Origin: '*'
+      Content-Type: text/html
+      Transfer-Encoding: chunked
+    status:
+      code: 200
+      message: OK
+    url: http://awair-omni-18959-backplate.local/air-data/latest
+version: 1
